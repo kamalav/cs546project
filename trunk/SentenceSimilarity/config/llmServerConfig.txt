@@ -1,0 +1,10 @@
+debug	true
+useStopwords	true
+useLemmas	true
+useMetric	true
+stopwordFile	llmStopwords.txt
+computeSimpleScore	false
+metricName	WNSim
+metricHost	handy.cs.uiuc.edu
+metricPort	29022
+metricThreshold	0.0001
