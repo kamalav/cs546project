@@ -30,7 +30,7 @@ public abstract class Model {
 		for (int i = 0; i < corpus.get_pairs_size(); i++) {
 			double similarity = similarity(corpus, i);
 			int confidence = confidence(corpus, i);
-			String outputLine = similarity + "\t" + confidence;
+			String outputLine = similarity + "\t" + confidence + "\n";
 			System.out.println("result computed: similarity=" + similarity
 					+ "\tconfidence=" + confidence + "\t");
 			sb.append(outputLine);
@@ -49,6 +49,7 @@ public abstract class Model {
 		fop.write(fileContent.getBytes());
 		fop.flush();
 		fop.close();
+		System.out.println("results written into file: " + fileName);
 	}
 
 	/*
