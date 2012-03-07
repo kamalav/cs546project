@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import edu.illinois.cs.cogcomp.edison.sentences.TextAnnotation;
 import edu.illinois.cs.cogcomp.mrcs.comparators.LlmComparator;
-import edu.illinois.cs.mmak4.corpus.Corpus;
 
 public class Model1LLM extends Model {
 
@@ -21,11 +20,10 @@ public class Model1LLM extends Model {
 	}
 
 	@Override
-	public double similarity(Corpus corpus, int line) {
+	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
 		try {
-			TextAnnotation[] tas = corpus.get_annotation_pair(line);
-			String source = tas[0].getText();
-			String target = tas[1].getText();
+			String source = ta1.getText();
+			String target = ta2.getText();
 			int scale = 5;
 			return scale * llm.compareStrings(source, target);
 		} catch (Exception e) {
@@ -37,7 +35,7 @@ public class Model1LLM extends Model {
 	}
 
 	@Override
-	public int confidence(Corpus corpus, int line) {
+	public int confidence(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO how to determine the confidence using LLM ?
 		return 100;
 	}

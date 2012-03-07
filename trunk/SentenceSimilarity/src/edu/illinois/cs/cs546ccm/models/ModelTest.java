@@ -2,6 +2,7 @@ package edu.illinois.cs.cs546ccm.models;
 
 import java.io.IOException;
 
+import edu.illinois.cs.cogcomp.edison.sentences.TextAnnotation;
 import edu.illinois.cs.mmak4.corpus.Corpus;
 
 public class ModelTest {
@@ -14,7 +15,10 @@ public class ModelTest {
 	public static void main(String[] args) throws IOException {
 
 		// add instances of models in this package to a model array
-		Model[] models = { new Model1LLM(), new Model2XXX(), new Model3YYY() };
+		Model[] models = { /* new Model1LLM(), */new Model2XXX() /*
+																 * , new
+																 * Model3YYY()
+																 */};
 
 		/*
 		 * note: for temporary testing, don't put all the corpus in the
@@ -24,18 +28,30 @@ public class ModelTest {
 		 */
 
 		// add instances of all corpus to a corpus array
-		Corpus[] allCorpus = {
-				new Corpus("input/STS.input.MSRpar.txt", "MSRpar"),
-				new Corpus("input/STS.input.MSRvid.txt", "MSRvid"),
-				new Corpus("input/STS.input.SMTeuroparl.txt", "SMTeuroparl") };
+		Corpus[] allCorpus = { new Corpus("input/temp.txt", "Temp") };
+		// new Corpus("input/STS.input.MSRpar.txt", "MSRpar"),
+		// new Corpus("input/STS.input.MSRvid.txt", "MSRvid"),
+		// new Corpus("input/STS.input.SMTeuroparl.txt", "SMTeuroparl") };
+
+		// do the below line only once, when no serialization file is saved
+		// SerializationUtils.serializeAllCorpusTextAnnotations(allCorpus);
 
 		// for each model, generate the output containing similarity and
 		// confidence for every pair of sentences, and save it into file
 		for (Model model : models) {
 			for (Corpus corpus : allCorpus) {
-				String fileName = "output/" + corpus.getId() + "_teamCCM_model"
+				// deserialize objects from file
+				String fileName = "serialization/" + corpus.getId() + ".sel";
+				TextAnnotation[] tas = SerializationUtils
+						.deserializeTextAnnotations(fileName);
+
+				// set the read objects to the model
+				model.setTextAnnotations(tas);
+
+				// compute result and save to file
+				fileName = "output/" + corpus.getId() + "_teamCCM_model"
 						+ model.getId() + ".txt";
-				model.computeAndSaveOutputToFile(corpus, fileName);
+				model.computeAndSaveOutputToFile(fileName);
 			}
 		}
 	}

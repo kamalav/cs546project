@@ -1,6 +1,6 @@
 package edu.illinois.cs.cs546ccm.models;
 
-import edu.illinois.cs.mmak4.corpus.Corpus;
+import edu.illinois.cs.cogcomp.edison.sentences.TextAnnotation;
 
 public class Model3YYY extends Model {
 
@@ -9,13 +9,13 @@ public class Model3YYY extends Model {
 	}
 
 	@Override
-	public double similarity(Corpus corpus, int line) {
+	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO implement this method
 		return -1;
 	}
 
 	@Override
-	public int confidence(Corpus corpus, int line) {
+	public int confidence(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO implement this method
 		return -1;
 	}
