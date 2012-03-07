@@ -31,8 +31,8 @@ public abstract class Model {
 			double similarity = similarity(corpus, i);
 			int confidence = confidence(corpus, i);
 			String outputLine = similarity + "\t" + confidence + "\n";
-			System.out.println("result computed: similarity=" + similarity
-					+ "\tconfidence=" + confidence + "\t");
+			System.out.println("Line " + i + " result computed: similarity="
+					+ similarity + "\tconfidence=" + confidence + "\t");
 			sb.append(outputLine);
 		}
 		return sb.toString();
