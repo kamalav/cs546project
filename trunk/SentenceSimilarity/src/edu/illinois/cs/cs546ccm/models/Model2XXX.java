@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import weka.classifiers.*;
-import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.trees.M5P;
 import weka.core.*;
 
 import edu.illinois.cs.cogcomp.edison.sentences.Constituent;
@@ -35,11 +35,11 @@ public class Model2XXX extends Model {
         
         // Ryan's attributes
         attributes.addElement(new Attribute("r1"));
-        attributes.addElement(new Attribute("r2"));
         //
         
         // Guihua's features
         attributes.addElement(new Attribute("g1"));
+        attributes.addElement(new Attribute("g2"));
         //
         
         // Cedar's features
@@ -54,15 +54,18 @@ public class Model2XXX extends Model {
         attributes.addElement(new Attribute("gs"));
         //
         
-        return new Instances("CCM-SemanticSimilarity", attributes, 1000);
+        Instances ret = new Instances("CCM-SemanticSimilarity", attributes, 1000);
+        ret.setClassIndex(ret.numAttributes() - 1);
+        return ret;
     }
 
 	@Override
 	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
-	    Instance example = getInstance(ta1, ta2, 0.0);
+	    Instance example = getInstance(ta1, ta2, Math.random());
+	    example.setDataset(data);
         double similarity;
         try {
-            similarity = model.classifyInstance(example);
+            similarity = model.distributionForInstance(example)[0];
         }
         catch (Exception e) {
             System.out.println("Exception while trying to classify");
@@ -198,7 +201,16 @@ public class Model2XXX extends Model {
 	private static double[] score1(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Ryan's method
-		return new double[]{0};
+	    View v1 = ta1.getView(ViewNames.SRL);
+        View v2 = ta2.getView(ViewNames.SRL);
+        
+        List<Constituent> c1 = v1.getConstituents();
+        List<Constituent> c2 = v2.getConstituents();
+        
+        //System.out.println(v1.toString());
+        //System.out.println(v1.toString());
+	    
+		return new double[]{Math.random()};
 	}
 
 	@Override
@@ -221,7 +233,7 @@ public class Model2XXX extends Model {
                 double gs = gs_arr.get(i);
                 trainInstance(ta1, ta2, gs);
             }
-            model = new LinearRegression();
+            model = new M5P();
             model.buildClassifier(data);
         } catch (Exception e) {
             // TODO Auto-generated catch block
