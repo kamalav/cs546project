@@ -28,13 +28,13 @@ public class ModelTest {
 		 */
 
 		// add instances of all corpus to a corpus array
-		Corpus[] allCorpus = { new Corpus("input/temp.txt", "Temp") };
-		// new Corpus("input/STS.input.MSRpar.txt", "MSRpar"),
-		// new Corpus("input/STS.input.MSRvid.txt", "MSRvid"),
-		// new Corpus("input/STS.input.SMTeuroparl.txt", "SMTeuroparl") };
+		Corpus[] allCorpus = { /* new Corpus("input/temp.txt", "Temp"), */
+		// new Corpus("input/STS.gs.MSRvid.txt", "MSRvid") };
+		 new Corpus("input/STS.gs.MSRpar.txt", "MSRpar"),
+		new Corpus("input/STS.input.SMTeuroparl.txt", "SMTeuroparl") };
 
-		// do the below line only once, when no serialization file is saved
-		// SerializationUtils.serializeAllCorpusTextAnnotations(allCorpus);
+		// do the below lines only once, when no serialization file is saved
+		//SerializationUtils.serializeAllCorpusTextAnnotations(allCorpus);
 
 		// for each model, generate the output containing similarity and
 		// confidence for every pair of sentences, and save it into file
@@ -47,6 +47,9 @@ public class ModelTest {
 
 				// set the read objects to the model
 				model.setTextAnnotations(tas);
+
+				fileName = "serialization/" + corpus.getId() + ".llm";
+				SerializationUtils.serializeLLMScores(tas, fileName);
 
 				// compute result and save to file
 				fileName = "output/" + corpus.getId() + "_teamCCM_model"
