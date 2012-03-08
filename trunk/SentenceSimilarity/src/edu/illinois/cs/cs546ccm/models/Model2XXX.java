@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import org.apache.thrift.TException;
-
 import weka.classifiers.*;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.*;
@@ -18,9 +16,6 @@ import edu.illinois.cs.cogcomp.edison.sentences.Constituent;
 import edu.illinois.cs.cogcomp.edison.sentences.TextAnnotation;
 import edu.illinois.cs.cogcomp.edison.sentences.View;
 import edu.illinois.cs.cogcomp.edison.sentences.ViewNames;
-import edu.illinois.cs.cogcomp.mrcs.comparators.LlmComparator;
-import edu.illinois.cs.cogcomp.thrift.base.AnnotationFailedException;
-import edu.illinois.cs.cogcomp.thrift.base.ServiceUnavailableException;
 
 public class Model2XXX extends Model {
 
@@ -64,14 +59,19 @@ public class Model2XXX extends Model {
 
 	@Override
 	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
-		double[] score1 = score1(ta1, ta2);
-		double[] score2 = score2(ta1, ta2);
-		double[] score3 = score3(ta1, ta2);
-		double[] score4 = score4(ta1, ta2);
-		return -1;
+	    Instance example = getInstance(ta1, ta2, 0.0);
+        double similarity;
+        try {
+            similarity = model.classifyInstance(example);
+        }
+        catch (Exception e) {
+            System.out.println("Exception while trying to classify");
+            similarity = -1;
+        }
+        return similarity;
 	}
 
-	private double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
+	private static double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Zhijin's method
 		View v1 = ta1.getView(ViewNames.NER);
@@ -129,13 +129,13 @@ public class Model2XXX extends Model {
 		return new double[]{score / cs1.size()};
 	}
 
-	private double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
+	private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Cedar's method
 		return new double[]{0};
 	}
 
-	private double score2_1(TextAnnotation ta1, TextAnnotation ta2) throws IOException{
+	private static double score2_1(TextAnnotation ta1, TextAnnotation ta2) throws IOException{
         // Guihua's method
         // ta1 is Text, and ta2 is Hypothesis
         View v1 = ta1.getView(ViewNames.SHALLOW_PARSE);
@@ -172,7 +172,7 @@ public class Model2XXX extends Model {
         return score;
     }
 
-    private double[] score2(TextAnnotation ta1, TextAnnotation ta2) {
+    private static double[] score2(TextAnnotation ta1, TextAnnotation ta2) {
         // TODO Auto-generated method stub
         // Guihua's method
         double score[]=new double[2];
@@ -195,7 +195,7 @@ public class Model2XXX extends Model {
         return score;
     }
 
-	private double[] score1(TextAnnotation ta1, TextAnnotation ta2) {
+	private static double[] score1(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Ryan's method
 		return new double[]{0};
@@ -229,22 +229,27 @@ public class Model2XXX extends Model {
             e.printStackTrace();
         }
     }
-
+    
     private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
+        data.add(getInstance(ta1, ta2, gs));
+    }
+
+    private static Instance getInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
         double[] score1 = score1(ta1, ta2);
         double[] score2 = score2(ta1, ta2);
         double[] score3 = score3(ta1, ta2);
         double[] score4 = score4(ta1, ta2);
         
-        data.add(new Instance(1.0, combineAttributes(score1, score2, score3, score4)));
+        return new Instance(1.0, combineAttributes(score1, score2, score3, score4, gs));
     }
 
-    private double[] combineAttributes(double[] score1, double[] score2, double[] score3,
-            double[] score4) {
-        double[] result = Arrays.copyOf(score1, score1.length + score2.length + score3.length + score4.length);
+    private static double[] combineAttributes(double[] score1, double[] score2, double[] score3,
+            double[] score4, double gs) {
+        double[] result = Arrays.copyOf(score1, score1.length + score2.length + score3.length + score4.length + 1);
         System.arraycopy(score2, 0, result, score1.length, score2.length);
         System.arraycopy(score3, 0, result, score1.length+score2.length, score3.length);
         System.arraycopy(score4, 0, result, score1.length+score2.length+score3.length, score4.length);
+        result[result.length-1] = gs;
         return result;
     }
 
@@ -262,5 +267,11 @@ public class Model2XXX extends Model {
             // we'll make a fuss further up the call stack
             return new ArrayList<Double>();
         }
+    }
+    
+    @Override
+    public void computeAndSaveOutputToFile(String fileName) throws IOException {
+        train("input/temp.gs.txt");
+        super.computeAndSaveOutputToFile(fileName);
     }
 }
