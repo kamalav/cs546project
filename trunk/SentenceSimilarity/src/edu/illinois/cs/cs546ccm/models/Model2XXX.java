@@ -28,12 +28,16 @@ public class Model2XXX extends Model {
 	FastVector attributes;
 	Classifier model;
 
-	StringBuffer featuresBuffer;
+	StringBuffer svmFeatureBuffer;
 
 	public Model2XXX() {
 		super("XXX");
 		data = defineFeatures();
-		featuresBuffer = new StringBuffer("");
+		resetSVMFeatureBuffer();
+	}
+
+	private void resetSVMFeatureBuffer() {
+		svmFeatureBuffer = new StringBuffer("");
 	}
 
 	private Instances defineFeatures() {
@@ -597,6 +601,11 @@ public class Model2XXX extends Model {
 	}
 
 	private static double srlSimilarity(TextAnnotation ta1, TextAnnotation ta2) {
+		// for temporary testing, to be replaced
+		if (!ta1.hasView(ViewNames.SRL) || !ta2.hasView(ViewNames.SRL)) {
+			return 0;
+		}
+
 		// TODO Auto-generated method stub
 		// Ryan's method
 		View v1 = ta1.getView(ViewNames.SRL);
@@ -789,7 +798,7 @@ public class Model2XXX extends Model {
 		inst.setValue(count, parseGS(gs));
 		// System.out.println(inst);
 
-		featuresBuffer.append(sb.toString() + "\n");
+		svmFeatureBuffer.append(sb.toString() + "\n");
 		return inst;
 	}
 
@@ -822,16 +831,18 @@ public class Model2XXX extends Model {
 		String gsFile = getGSFileName(fileName);
 		train(gsFile);
 
+		resetSVMFeatureBuffer();
+
+		super.computeAndSaveOutputToFile(fileName);
+
 		// save feature vectors to file for (Guihua's) SVM training
 		String corpusLabel = fileName.split("[/_]")[1];
 		String svmFileName = "svm/" + corpusLabel + ".txt";
 		saveSVMFeaturesToFile(svmFileName);
-
-		super.computeAndSaveOutputToFile(fileName);
 	}
 
 	private void saveSVMFeaturesToFile(String fileName) {
-		String fileContent = featuresBuffer.toString();
+		String fileContent = svmFeatureBuffer.toString();
 		if (fileContent.isEmpty()) {
 			System.err.println("SVM features buffer is empty!");
 		} else {
@@ -850,11 +861,9 @@ public class Model2XXX extends Model {
 	}
 
 	private static String getGSFileName(String fileName) {
-		String corpusLabel = fileName.split("[/_]")[1];
-		if (corpusLabel.contains("MSR"))
-			return "input/STS.gs." + corpusLabel + ".txt";
-		else
-			return "input/STS.gs.Temp.txt";
+		String corpusLabel = fileName.substring(fileName.indexOf('/') + 1,
+				fileName.indexOf('_'));
+		return "input/STS.gs." + corpusLabel + ".txt";
 	}
 
 }
