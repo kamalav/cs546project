@@ -19,6 +19,17 @@ public abstract class Model {
 	}
 
 	/*
+	 * an array of LLM scores, which are read from the cached files
+	 * llmScores[2*i] is the score for i-th pair, llmScores[2*i+1] is the score
+	 * for i-th pair in reversed order
+	 */
+	protected double[] llmScores;
+
+	public void setLLMScores(double[] llmScores) {
+		this.llmScores = llmScores;
+	}
+
+	/*
 	 * abstract function for computing similarity score (0.0-5.0) between two
 	 * sentences, indexed by line number. This function is to be implemented by
 	 * each actual model, definitely using corpus.get_annotation_pair(line)
@@ -40,20 +51,20 @@ public abstract class Model {
 			return null;
 		}
 
-			StringBuffer sb = new StringBuffer("");
-			int pairs = this.tas.length / 2;
-			for (int i = 0; i < pairs; i++) {
-				TextAnnotation ta1 = this.tas[2 * i];
-				TextAnnotation ta2 = this.tas[2 * i + 1];
-				double similarity = similarity(ta1, ta2);
-				int confidence = confidence(ta1, ta2);
-				String outputLine = similarity + "\t" + confidence + "\n";
-				System.out.println("result computed: similarity=" + similarity
-						+ "\tconfidence=" + confidence + "\t");
-				sb.append(outputLine);
-			}
-			return sb.toString();
-		
+		StringBuffer sb = new StringBuffer("");
+		int pairs = this.tas.length / 2;
+		for (int i = 0; i < pairs; i++) {
+			TextAnnotation ta1 = this.tas[2 * i];
+			TextAnnotation ta2 = this.tas[2 * i + 1];
+			double similarity = similarity(ta1, ta2);
+			int confidence = confidence(ta1, ta2);
+			String outputLine = similarity + "\t" + confidence + "\n";
+			System.out.println("result computed: similarity=" + similarity
+					+ "\tconfidence=" + confidence + "\t");
+			sb.append(outputLine);
+		}
+		return sb.toString();
+
 	}
 
 	/*

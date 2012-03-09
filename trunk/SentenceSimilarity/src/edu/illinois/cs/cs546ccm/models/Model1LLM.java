@@ -23,9 +23,11 @@ public class Model1LLM extends Model {
 	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
 		try {
 			String source = ta1.getText();
-			String target = ta2.getText();
+			int line = Integer.parseInt(ta1.getId());
+			// get cached score, not using reversed score
+			double llmScore = llmScores[line];
 			int scale = 5;
-			return scale * llm.compareStrings(source, target);
+			return scale * llmScore;// llm.compareStrings(source, target);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
