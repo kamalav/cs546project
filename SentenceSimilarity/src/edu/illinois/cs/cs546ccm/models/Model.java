@@ -29,6 +29,11 @@ public abstract class Model {
 		this.llmScores = llmScores;
 	}
 
+	public double[] getLLMScores(int line) {
+		return new double[] { this.llmScores[2 * line],
+				this.llmScores[2 * line + 1] };
+	}
+
 	/*
 	 * abstract function for computing similarity score (0.0-5.0) between two
 	 * sentences, indexed by line number. This function is to be implemented by
