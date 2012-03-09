@@ -105,20 +105,20 @@ public class Model2XXX extends Model {
 
 	private double[] score5(TextAnnotation ta1, TextAnnotation ta2) {
 		// use cached raw LLM score as a feature
-		int index1 = Integer.parseInt(ta1.getId());
-		int index2 = Integer.parseInt(ta2.getId());
-		System.out.println(index1 + " " + index2);
-		double llmScore1 = llmScores[index1];
-		double llmScore2 = llmScores[index2];
-		System.out.println(llmScore1 + " " + llmScore2);
-		return new double[] { llmScore1, llmScore2 };
+		int line = Integer.parseInt(ta1.getId());
+		return getLLMScores(line);
 	}
 
 	private static double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Zhijin's method
+		if (!ta1.hasView(ViewNames.NER) && !ta2.hasView(ViewNames.NER)) {
+
+		}
+
 		View v1 = ta1.getView(ViewNames.NER);
 		View v2 = ta2.getView(ViewNames.NER);
+
 		// System.out.println(v1);
 		// System.out.println(v2);
 
@@ -508,7 +508,7 @@ public class Model2XXX extends Model {
 		}
 
 		System.out.println("The score for this pair of sentence is " + score);
-
+		scores[0] = score;
 		return scores;
 		// return new double[] {score};
 	}
