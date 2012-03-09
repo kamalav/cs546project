@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import weka.classifiers.*;
 import weka.classifiers.functions.LibSVM;
@@ -153,11 +155,436 @@ public class Model2XXX extends Model {
         return new double[]{score / cs1.size(), sizeDiff};
     }
 
-    private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
-        // TODO Auto-generated method stub
-        // Cedar's method
-        return new double[]{0};
-    }
+    private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) throws IOException {
+		// TODO Auto-generated method stub
+		// Cedar's method
+		
+		//LLM as the comparator
+    	
+    	Model1LLM m = new Model1LLM();
+		
+		
+        //double result = m.similarity(chunckcontent1, chunckcontent2);
+		
+		//Initialize the score of the pair of sentences to be 0.
+		double score=0;
+		 double scores[] = new double[1];
+	        scores[0]=score;
+		View v1 = ta1.getView(ViewNames.POS);
+		View v2 = ta2.getView(ViewNames.POS);
+		
+		List<Constituent> cs1;;
+		List<Constituent> cs2;
+		
+		//User sentence of the shorter length as the source sentence,i.e. cs1
+		if (v1.getConstituents().size() < v2.getConstituents().size()) {
+			cs1 = v1.getConstituents();
+			cs2 = v2.getConstituents();
+		} else {
+			cs1 = v2.getConstituents();
+			cs2 = v1.getConstituents();
+		}
+		
+		/*
+		 * Define the counts of each POS tags 
+		 */
+		int cNNP=0;
+		int cNNPS=0;
+		int cNN=0;
+		int cNNS=0;
+		
+		int cVB=0;
+		int cVBD=0;
+		int cVBG=0;
+		int cVBN=0;
+		int cVBP=0;
+		int cVBZ=0;
+
+
+		
+		int cNouns=0; //count of nouns
+		int cVerbs=0; //count of verbs
+		
+		int cNNP2=0;
+		int cNNPS2=0;
+		int cNN2=0;
+		int cNNS2=0;
+		
+		int cVB2=0;
+		int cVBD2=0;
+		int cVBG2=0;
+		int cVBN2=0;
+		int cVBP2=0;
+		int cVBZ2=0;
+
+
+		
+		int cNouns2=0; //count of nouns
+		int cVerbs2=0; //count of verbs
+
+
+		/*
+		 * Define the set of words for each POS tags.
+		 * Here we only consider noun-related and verb-related POS tags,
+		 * since the words with these tags are most informative in the sentence. 
+		 */
+		
+		//noun-related POS tags
+		//sentence1
+		Set<String> NNP_Set=new HashSet<String>();
+		Set<String> NNPS_Set=new HashSet<String>();
+		Set<String> NN_Set=new HashSet<String>();
+		Set<String> NNS_Set=new HashSet<String>();
+		
+		//sentence2
+		Set<String> NNP_Set2=new HashSet<String>();
+		Set<String> NNPS_Set2=new HashSet<String>();
+		Set<String> NN_Set2=new HashSet<String>();
+		Set<String> NNS_Set2=new HashSet<String>();
+		
+		//the set all nouns
+	   Set<String> Nouns_Set=new HashSet<String>();
+	   Set<String> Nouns_Set2=new HashSet<String>();
+
+		
+		//verb-related POS tags
+		// Question: Do the types of verbs really matter??? 
+		Set<String> VB_Set=new HashSet<String>();
+		Set<String> VBD_Set=new HashSet<String>();
+		Set<String> VBG_Set=new HashSet<String>();
+		Set<String> VBN_Set=new HashSet<String>();
+		Set<String> VBP_Set=new HashSet<String>();
+		Set<String> VBZ_Set=new HashSet<String>();
+		
+		Set<String> VB_Set2=new HashSet<String>();
+		Set<String> VBD_Set2=new HashSet<String>();
+		Set<String> VBG_Set2=new HashSet<String>();
+		Set<String> VBN_Set2=new HashSet<String>();
+		Set<String> VBP_Set2=new HashSet<String>();
+		Set<String> VBZ_Set2=new HashSet<String>();
+		
+		//the set of all verbs
+		Set<String> Verbs_Set=new HashSet<String>();
+		Set<String> Verbs_Set2=new HashSet<String>();
+
+
+
+		
+		for(Constituent c1:cs1)
+		{
+              String tag=c1.getLabel();
+              String word=c1.toString();
+              if (tag.contentEquals("NNP"))
+              {
+            	  cNNP++;
+            	  NNP_Set.add(word);
+              }
+              else if (tag.contentEquals("NNPS"))
+              {
+            	  cNNPS++;
+            	  NNPS_Set.add(word);
+              }
+              else if (tag.contentEquals("NN"))
+              {
+            	  cNN++;
+            	  NN_Set.add(word);
+              }
+              else if (tag.contentEquals("NNS"))
+              {
+            	  cNNS++;
+            	  NNS_Set.add(word);
+              }
+              else if (tag.contentEquals("VB"))
+              {
+            	  cVB++;
+            	  VB_Set.add(word);
+              }
+              else if (tag.contentEquals("VBD"))
+              {
+            	  cVBD++;
+            	  VBD_Set.add(word);
+              }
+              else if (tag.contentEquals("VBG"))
+              {
+            	  cVBG++;
+            	  VBG_Set.add(word);
+              }
+              else if (tag.contentEquals("VBN"))
+              {
+            	  cVBN++;
+            	  VBN_Set.add(word);
+              }
+              else if (tag.contentEquals("VBP"))
+              {
+            	  cVBP++;
+            	  VBP_Set.add(word);
+              }
+              else if (tag.contentEquals("VBZ"))
+              {
+            	  cVBZ++;
+            	  VBZ_Set.add(word);
+              }
+              
+              if(tag.startsWith("N"))
+            	  Nouns_Set.add(word);
+              else if(tag.startsWith("V"))
+            	  Verbs_Set.add(word);
+               
+		}
+		
+		for(Constituent c2:cs2)
+		{
+              String tag=c2.getLabel();
+              String word=c2.toString();
+              
+              if (tag.contentEquals("NNP"))
+              {
+            	  cNNP2++;
+            	  NNP_Set2.add(word);
+              }
+              else if (tag.contentEquals("NNPS"))
+              {
+            	  cNNPS2++;
+            	  NNPS_Set2.add(word);
+              }
+              else if (tag.contentEquals("NN"))
+              {
+            	  cNN2++;
+            	  NN_Set2.add(word);
+              }
+              else if (tag.contentEquals("NNS"))
+              {
+            	  cNNS2++;
+            	  NNS_Set2.add(word);
+              }
+              else if (tag.contentEquals("VB"))
+              {
+            	  cVB2++;
+            	  VB_Set2.add(word);
+              }
+              else if (tag.contentEquals("VBD"))
+              {
+            	  cVBD2++;
+            	  VBD_Set2.add(word);
+              }
+              else if (tag.contentEquals("VBG"))
+              {
+            	  cVBG2++;
+            	  VBG_Set2.add(word);
+              }
+              else if (tag.contentEquals("VBN"))
+              {
+            	  cVBN2++;
+            	  VBN_Set2.add(word);
+              }
+              else if (tag.contentEquals("VBP"))
+              {
+            	  cVBP2++;
+            	  VBP_Set2.add(word);
+              }
+              else if (tag.contentEquals("VBZ"))
+              {
+            	  cVBZ2++;
+            	  VBZ_Set2.add(word);
+              }
+              
+              if(tag.startsWith("N"))
+            	  Nouns_Set2.add(word);
+              else if(tag.startsWith("V"))
+            	  Verbs_Set2.add(word);
+               
+		}
+		
+	
+		
+		/* Heuristic #1:  
+		 * If at least one alignment of two proper nouns between the two sentences can be 
+		 * found, then they will be likely to share the same topics. We can conclude the pair
+		 * of sentences has at least score 0.2/1. 
+		 * 
+		 * Implementation:
+		 * 
+		 */
+		
+		if(NNP_Set.size()<NNP_Set2.size())
+		{
+		loop_outer:
+			for(String w:NNP_Set)
+			{
+				for(String w2:NNP_Set2)
+				{
+					if(w.compareToIgnoreCase(w2)==0)
+					{
+						score=0.2;
+						break loop_outer;
+					}	
+				}
+			}
+		}
+		else
+		{
+			loop_outer:
+				for(String w:NNP_Set2)
+				{
+					for(String w2:NNP_Set)
+					{
+						if(w.compareToIgnoreCase(w2)==0)
+						{
+							score=0.2;
+							break loop_outer;
+						}	
+					}
+				}	
+		}
+		
+		System.out.println("Hello");
+		
+		int n_algn=0; 
+		
+		
+        /*
+         * Find the number of alignments of nouns between the two sentences
+         * Loop through each noun in the sentence with less number of nouns. 
+         */
+		if (Nouns_Set.size()<Nouns_Set2.size())
+		{
+			
+		for (String w :Nouns_Set)
+		{
+			for(String w2:Nouns_Set2)
+			{
+		         //if (w.contentEquals(w2))
+		        if(m.similarity(w, w2)>0.9)	
+				{
+		        	//System.out.println(w+" "+w2);
+		            n_algn++;
+		            break;
+				}
+			}
+		}
+		
+		}
+		else
+		{
+			for (String w :Nouns_Set2)
+			{
+				for(String w2:Nouns_Set)
+				{
+			         //if (w.contentEquals(w2))
+			        if(m.similarity(w, w2)>0.9)	
+					{
+			        	//System.out.println(w+" "+w2);
+			            n_algn++;
+			            break;
+					}
+				}
+			}
+			
+		}
+		
+		
+		
+		/*
+         * Find the number of alignments of verbs between the two sentences
+         * Start with Looping through each verb in the sentence with less number of verbs. 
+         */
+		int v_algn=0;
+		if(Verbs_Set.size()<Verbs_Set2.size())
+		{
+		for (String w :Verbs_Set)
+		{
+			for(String w2:Verbs_Set2)
+			{
+		         //if (w.contentEquals(w2))
+		        if(m.similarity(w, w2)>0.9)	
+				{
+		        	//System.out.println(w+"::::::::::::::::::::::"+w2);
+		            v_algn++;
+		            break;
+				}
+			}
+		}
+		}
+		else{
+			for (String w :Verbs_Set)
+			{
+				for(String w2:Verbs_Set2)
+				{
+			         //if (w.contentEquals(w2))
+			        if(m.similarity(w, w2)>0.9)	
+					{
+			        	System.out.println(w+" "+w2);
+			            v_algn++;
+			            break;
+					}
+				}
+			}
+			
+		}
+		
+
+		if(n_algn+v_algn==0)
+		return scores;
+		
+		/* Heuristic #2:  
+		 * After the heuristic#1 is confirmed, if at least one alignment of two verbs between 
+		 * the two sentences can be found, then they will be likely to share some details. 
+		 * Hence the pair can be given score 2 in GS, and 0.4/1.0 here.
+		 * 
+		 */
+		if(score==0.2)
+		{
+		  if(v_algn>0)
+			score=0.4; 
+		}
+		//System.out.println("The number of matched verbs is:"+v_algn);
+		
+		
+		/*Heuristic #3: 
+		 * The more alignments of words with POS tags in the same category, the higher is the score.
+		 * 
+		 * Implementation: 
+		 * Nouns are considered as one group, so does verbs. 
+		 * 
+		 * Remarks: 
+		 * 
+		 */
+		
+		int nsem_tag=0;
+		int nsem_tag2=0;
+		
+		nsem_tag=Nouns_Set.size()+Verbs_Set.size();
+		nsem_tag2=Nouns_Set2.size()+Verbs_Set2.size();
+		
+	   double value=0;
+		
+        if(nsem_tag>nsem_tag2)
+        {
+            value=(double) (v_algn+n_algn)/nsem_tag;
+        }
+        else
+        {
+            value=(double) (v_algn+n_algn)/nsem_tag2;
+        }
+		
+        
+        if(NNP_Set.isEmpty() && NNP_Set2.isEmpty())
+        {
+            score=value;
+        }
+        else
+        {
+            score=score+value*0.6;
+        }
+		
+		System.out.println("The score for this pair of sentence is "+score);
+		
+       
+		return scores;
+		//return new double[] {score};
+	}
+
+  
 
     private static double score2_1(TextAnnotation ta1, TextAnnotation ta2) throws IOException{
         // Guihua's method
@@ -366,7 +793,13 @@ public class Model2XXX extends Model {
     private Instance getInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
         double[] score1 = score1(ta1, ta2);
         double[] score2 = score2(ta1, ta2);
-        double[] score3 = score3(ta1, ta2);
+        double[] score3 = new double[1];
+		try {
+			score3 = score3(ta1, ta2);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         double[] score4 = score4(ta1, ta2);
         
         return combineAttributes(score1, score2, score3, score4, gs);
