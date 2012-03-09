@@ -97,6 +97,16 @@ public class Model2XXX extends Model {
 		return similarity;
 	}
 
+	private double[] score5(TextAnnotation ta1, TextAnnotation ta2) {
+		// use cached raw LLM score as a feature
+		int index1 = Integer.parseInt(ta1.getId());
+		int index2 = Integer.parseInt(ta2.getId());
+		double llmScore1 = llmScores[index1];
+		double llmScore2 = llmScores[index2];
+		System.out.println(llmScore1 + " " + llmScore2);
+		return new double[] { llmScore1, llmScore2 };
+	}
+
 	private static double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Zhijin's method
@@ -725,27 +735,44 @@ public class Model2XXX extends Model {
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
-			double[] score3, double[] score4, double gs) {
+			double[] score3, double[] score4, double[] score5, double gs) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
+
+		StringBuffer sb = new StringBuffer("");
+		sb.append(HandleResult.score_to_label(gs));
+
 		int count = 0;
 		for (int i = 0; i < score1.length; i++) {
 			inst.setValue(count, score1[i]);
 			count++;
+			sb.append(" " + count + ":" + score1[i]);
 		}
 		for (int i = 0; i < score2.length; i++) {
 			inst.setValue(count, score2[i]);
 			count++;
+			sb.append(" " + count + ":" + score2[i]);
 		}
 		for (int i = 0; i < score3.length; i++) {
 			inst.setValue(count, score3[i]);
 			count++;
+			sb.append(" " + count + ":" + score3[i]);
 		}
 		for (int i = 0; i < score4.length; i++) {
 			inst.setValue(count, score4[i]);
 			count++;
+			sb.append(" " + count + ":" + score4[i]);
 		}
+		for (int i = 0; i < score5.length; i++) {
+			inst.setValue(count, score5[i]);
+			count++;
+			sb.append(" " + count + ":" + score5[i]);
+		}
+
 		inst.setValue(count, parseGS(gs));
+		// System.out.println(inst);
+
+		featuresBuffer.append(sb.toString() + "\n");
 		return inst;
 	}
 
