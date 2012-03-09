@@ -29,6 +29,9 @@ public abstract class Model {
 		this.llmScores = llmScores;
 	}
 
+	/*
+	 * return two LLM scores (normal and reversed) of sentences in the line
+	 */
 	public double[] getLLMScores(int line) {
 		return new double[] { this.llmScores[2 * line],
 				this.llmScores[2 * line + 1] };
