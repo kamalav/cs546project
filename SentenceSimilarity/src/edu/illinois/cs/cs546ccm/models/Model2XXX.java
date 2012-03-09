@@ -38,7 +38,7 @@ public class Model2XXX extends Model {
 
 	private Instances defineFeatures() {
 		// Declare the attribute vector
-		attributes = new FastVector(8);
+		attributes = new FastVector(10);
 
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
@@ -61,6 +61,11 @@ public class Model2XXX extends Model {
 		// Zhijin's features
 		attributes.addElement(new Attribute("z1"));
 		attributes.addElement(new Attribute("z2"));
+		//
+
+		// LLM's features
+		attributes.addElement(new Attribute("l1"));
+		attributes.addElement(new Attribute("l2"));
 		//
 
 		// Gold-standard score (class value)
@@ -92,7 +97,7 @@ public class Model2XXX extends Model {
 			double[] res = model.distributionForInstance(example);
 			similarity = model.classifyInstance(example) / 10;
 		} catch (Exception e) {
-			System.out.println("Exception while trying to classify");
+			System.err.println("Exception while trying to classify");
 			similarity = -1;
 		}
 		return similarity;
@@ -102,6 +107,7 @@ public class Model2XXX extends Model {
 		// use cached raw LLM score as a feature
 		int index1 = Integer.parseInt(ta1.getId());
 		int index2 = Integer.parseInt(ta2.getId());
+		System.out.println(index1 + " " + index2);
 		double llmScore1 = llmScores[index1];
 		double llmScore2 = llmScores[index2];
 		System.out.println(llmScore1 + " " + llmScore2);
@@ -744,30 +750,31 @@ public class Model2XXX extends Model {
 		sb.append(HandleResult.score_to_label(gs));
 
 		int count = 0;
+		int featureIndex = 1;
 		for (int i = 0; i < score1.length; i++) {
 			inst.setValue(count, score1[i]);
 			count++;
-			sb.append(" " + count + ":" + score1[i]);
+			sb.append(" " + featureIndex++ + ":" + score1[i]);
 		}
 		for (int i = 0; i < score2.length; i++) {
 			inst.setValue(count, score2[i]);
 			count++;
-			sb.append(" " + count + ":" + score2[i]);
+			sb.append(" " + featureIndex++ + ":" + score2[i]);
 		}
 		for (int i = 0; i < score3.length; i++) {
 			inst.setValue(count, score3[i]);
 			count++;
-			sb.append(" " + count + ":" + score3[i]);
+			sb.append(" " + featureIndex++ + ":" + score3[i]);
 		}
 		for (int i = 0; i < score4.length; i++) {
 			inst.setValue(count, score4[i]);
 			count++;
-			sb.append(" " + count + ":" + score4[i]);
+			sb.append(" " + featureIndex++ + ":" + score4[i]);
 		}
 		for (int i = 0; i < score5.length; i++) {
 			inst.setValue(count, score5[i]);
 			count++;
-			sb.append(" " + count + ":" + score5[i]);
+			sb.append(" " + featureIndex++ + ":" + score5[i]);
 		}
 
 		inst.setValue(count, parseGS(gs));
