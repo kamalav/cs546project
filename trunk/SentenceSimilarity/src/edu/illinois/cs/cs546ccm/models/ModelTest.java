@@ -48,8 +48,8 @@ public class ModelTest {
 				// set the read objects to the model
 				model.setTextAnnotations(tas);
 
-				fileName = "serialization/" + corpus.getId() + ".llm";
-				SerializationUtils.serializeLLMScores(tas, fileName);
+				// fileName = "serialization/" + corpus.getId() + ".llm";
+				// SerializationUtils.serializeLLMScores(tas, fileName);
 
 				// compute result and save to file
 				fileName = "output/" + corpus.getId() + "_teamCCM_model"
