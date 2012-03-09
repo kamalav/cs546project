@@ -55,6 +55,7 @@ public class Model2XXX extends Model {
         
         // Zhijin's features
         attributes.addElement(new Attribute("z1"));
+        attributes.addElement(new Attribute("z2"));
         //
         
         // Gold-standard score (class value)
@@ -148,8 +149,8 @@ public class Model2XXX extends Model {
             }
         }
         if(cs1.size() == 0)
-            return new double[]{0};
-        return new double[]{score / cs1.size()};
+            return new double[]{0, sizeDiff};
+        return new double[]{score / cs1.size(), sizeDiff};
     }
 
     private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
