@@ -615,9 +615,10 @@ public class Model2XXX extends Model {
                 
                 //only if they have the same type of chunk (NP, VP, and so on), they can compare, and get the max one
                 if(chuncktype1.compareToIgnoreCase(chuncktype2)==0){
-                    String chunckcontent1=c1.toString();
+                	double result=constituentMatch(c1, c2);
+                   /* String chunckcontent1=c1.toString();
                     Model1LLM m = new Model1LLM();
-                    double result = m.similarity(chunckcontent1, chunckcontent2);
+                    double result = m.similarity(chunckcontent1, chunckcontent2);*/
                     if(result>point) point=result;
                 }
             }
@@ -625,7 +626,7 @@ public class Model2XXX extends Model {
         }
         
         //Normalize by the Hypothesis's length
-        score=score/cs2.size();
+        if(cs2.size()!=0)  score=score/cs2.size();
         return score;
     }
 
@@ -867,6 +868,6 @@ public class Model2XXX extends Model {
         if(corpusLabel.contains("MSR"))
             return "input/STS.gs."+corpusLabel+".txt";
         else
-            return "input/temp.gs.txt";
+            return "input/STS.gs.Temp.txt";
     }
 }
