@@ -719,8 +719,9 @@ public class Model2XXX extends Model {
 		double[] score2 = score2(ta1, ta2);
 		double[] score3 = score3(ta1, ta2);
 		double[] score4 = score4(ta1, ta2);
+		double[] score5 = score5(ta1, ta2);
 
-		return combineAttributes(score1, score2, score3, score4, gs);
+		return combineAttributes(score1, score2, score3, score4, score5, gs);
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
