@@ -38,22 +38,23 @@ public class ModelTest {
 
 		// for each model, generate the output containing similarity and
 		// confidence for every pair of sentences, and save it into file
-		for (Model model : models) {
-			for (Corpus corpus : allCorpus) {
-				// deserialize objects from file
-				System.out.println("\nDeserializing text annotations for "
-						+ corpus.getId());
-				String fileName = "serialization/" + corpus.getId() + ".sel";
-				TextAnnotation[] tas = SerializationUtils
-						.deserializeTextAnnotations(fileName);
+		for (Corpus corpus : allCorpus) {
 
+			// deserialize objects from file
+			System.out.println("Deserializing text annotations for "
+					+ corpus.getId() + "...");
+			String fileName = "serialization/" + corpus.getId() + ".sel";
+			TextAnnotation[] tas = SerializationUtils
+					.deserializeTextAnnotations(fileName);
+
+			// deserialize LLM scores from file
+			fileName = "serialization/" + corpus.getId() + ".llm";
+			double[] llmScores = SerializationUtils
+					.deserializeLLMScores(fileName);
+
+			for (Model model : models) {
 				// set the read objects to the model
 				model.setTextAnnotations(tas);
-
-				// deserialize LLM scores from file
-				fileName = "serialization/" + corpus.getId() + ".llm";
-				double[] llmScores = SerializationUtils
-						.deserializeLLMScores(fileName);
 
 				// set the LLM scores to the model
 				model.setLLMScores(llmScores);
