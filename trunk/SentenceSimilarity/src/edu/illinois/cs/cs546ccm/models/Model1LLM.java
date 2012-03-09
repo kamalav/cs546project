@@ -25,7 +25,7 @@ public class Model1LLM extends Model {
 			String source = ta1.getText();
 			int line = Integer.parseInt(ta1.getId());
 			// get cached score, not using reversed score
-			double llmScore = llmScores[line];
+			double llmScore = getLLMScores(line)[0];
 			int scale = 5;
 			return scale * llmScore;// llm.compareStrings(source, target);
 		} catch (Exception e) {
