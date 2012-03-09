@@ -105,15 +105,24 @@ public class Model2XXX extends Model {
 
 	private double[] score5(TextAnnotation ta1, TextAnnotation ta2) {
 		// use cached raw LLM score as a feature
-		int line = Integer.parseInt(ta1.getId());
+		int line = Integer.parseInt(ta1.getId()) / 2;
 		return getLLMScores(line);
 	}
 
-	private static double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
+	private double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Zhijin's method
-		if (!ta1.hasView(ViewNames.NER) && !ta2.hasView(ViewNames.NER)) {
 
+		// if both do not contain NER views, use averaged LLM scores instead
+		if (!ta1.hasView(ViewNames.NER) || !ta2.hasView(ViewNames.NER)) {
+			int line = Integer.parseInt(ta1.getId()) / 2;
+			double[] llmPairScores = getLLMScores(line);
+			int sizeDiff = ta1.hasView(ViewNames.NER) ? ta1
+					.getView(ViewNames.NER).getConstituents().size() : ta2
+					.hasView(ViewNames.NER) ? ta2.getView(ViewNames.NER)
+					.getConstituents().size() : 0;
+			double score = (llmPairScores[0] + llmPairScores[1]) / 2;
+			return new double[] { score, sizeDiff };
 		}
 
 		View v1 = ta1.getView(ViewNames.NER);
@@ -174,7 +183,7 @@ public class Model2XXX extends Model {
 		return new double[] { score / cs1.size(), sizeDiff };
 	}
 
-	private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
+	private double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Cedar's method
 
@@ -513,7 +522,7 @@ public class Model2XXX extends Model {
 		// return new double[] {score};
 	}
 
-	private static double score2_1(TextAnnotation ta1, TextAnnotation ta2)
+	private double score2_1(TextAnnotation ta1, TextAnnotation ta2)
 			throws IOException {
 		// Guihua's method
 		// ta1 is Text, and ta2 is Hypothesis
@@ -557,7 +566,7 @@ public class Model2XXX extends Model {
 		return score;
 	}
 
-	private static double[] score2(TextAnnotation ta1, TextAnnotation ta2) {
+	private double[] score2(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Guihua's method
 		double score[] = new double[2];
@@ -580,7 +589,7 @@ public class Model2XXX extends Model {
 		return score;
 	}
 
-	private static double[] score1(TextAnnotation ta1, TextAnnotation ta2) {
+	private double[] score1(TextAnnotation ta1, TextAnnotation ta2) {
 		return new double[] { ta1.getText().split(" ").length,
 				ta2.getText().split(" ").length, wordsInCommon(ta1, ta2),
 				wordsInCommon(ta2, ta1), srlSimilarity(ta1, ta2),
@@ -698,7 +707,7 @@ public class Model2XXX extends Model {
 	@Override
 	public int confidence(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO implement this method
-		return -1;
+		return 100;
 	}
 
 	public void train(String gsFile) {

@@ -28,10 +28,10 @@ public class ModelTest {
 		 */
 
 		// add instances of all corpus to a corpus array
-		Corpus[] allCorpus = { new Corpus("input/STS.input.Temp.txt", "Temp") };
-		// new Corpus("input/STS.input.MSRvid.txt", "MSRvid") };
-		// new Corpus("input/STS.input.MSRpar.txt", "MSRpar"),
-		// new Corpus("input/STS.input.SMTeuroparl.txt", "SMTeuroparl") };
+		Corpus[] allCorpus = { new Corpus("input/STS.input.Temp.txt", "Temp"),
+				new Corpus("input/STS.input.MSRvid.txt", "MSRvid"),
+				new Corpus("input/STS.input.MSRpar.txt", "MSRpar"),
+				new Corpus("input/STS.input.SMTeuroparl.txt", "SMTeuroparl") };
 
 		// do the below lines only once, when no serialization file is saved
 		// SerializationUtils.serializeAllCorpusTextAnnotations(allCorpus);
@@ -41,6 +41,8 @@ public class ModelTest {
 		for (Model model : models) {
 			for (Corpus corpus : allCorpus) {
 				// deserialize objects from file
+				System.out.println("\nDeserializing text annotations for "
+						+ corpus.getId());
 				String fileName = "serialization/" + corpus.getId() + ".sel";
 				TextAnnotation[] tas = SerializationUtils
 						.deserializeTextAnnotations(fileName);
