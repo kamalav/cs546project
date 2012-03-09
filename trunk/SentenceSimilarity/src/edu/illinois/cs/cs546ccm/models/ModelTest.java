@@ -15,10 +15,9 @@ public class ModelTest {
 	public static void main(String[] args) throws IOException {
 
 		// add instances of models in this package to a model array
-		Model[] models = { /* new Model1LLM(), */new Model2XXX() /*
-																 * , new
-																 * Model3YYY()
-																 */};
+		Model[] models = { new Model1LLM(), new Model2XXX() /*
+															 * , new Model3YYY()
+															 */};
 
 		/*
 		 * note: for temporary testing, don't put all the corpus in the
@@ -47,9 +46,6 @@ public class ModelTest {
 
 				// set the read objects to the model
 				model.setTextAnnotations(tas);
-
-				// fileName = "serialization/" + corpus.getId() + ".llm";
-				// SerializationUtils.serializeLLMScores(tas, fileName);
 
 				// deserialize LLM scores from file
 				fileName = "serialization/" + corpus.getId() + ".llm";
