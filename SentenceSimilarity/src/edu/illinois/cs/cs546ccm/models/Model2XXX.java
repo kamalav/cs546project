@@ -1,4 +1,4 @@
-package edu.illinois.cs.cs546ccm.models;
+package edu.illinois.cs.cs546ccm.models; 
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -155,13 +155,13 @@ public class Model2XXX extends Model {
         return new double[]{score / cs1.size(), sizeDiff};
     }
 
-    private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) throws IOException {
+    private static double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
 		// TODO Auto-generated method stub
 		// Cedar's method
 		
 		//LLM as the comparator
     	
-    	Model1LLM m = new Model1LLM();
+    	//Model1LLM m = new Model1LLM();
 		
 		
         //double result = m.similarity(chunckcontent1, chunckcontent2);
@@ -170,6 +170,9 @@ public class Model2XXX extends Model {
 		double score=0;
 		 double scores[] = new double[1];
 	        scores[0]=score;
+	        
+	    //The threshold for word comparator. For constituentMatch function.       
+	    double threshold=0.9;    
 		View v1 = ta1.getView(ViewNames.POS);
 		View v2 = ta2.getView(ViewNames.POS);
 		
@@ -223,175 +226,178 @@ public class Model2XXX extends Model {
 		int cVerbs2=0; //count of verbs
 
 
+		
 		/*
-		 * Define the set of words for each POS tags.
+		 * Define the set of constituents for each POS tags.
 		 * Here we only consider noun-related and verb-related POS tags,
 		 * since the words with these tags are most informative in the sentence. 
 		 */
 		
 		//noun-related POS tags
 		//sentence1
-		Set<String> NNP_Set=new HashSet<String>();
-		Set<String> NNPS_Set=new HashSet<String>();
-		Set<String> NN_Set=new HashSet<String>();
-		Set<String> NNS_Set=new HashSet<String>();
+		Set<Constituent> NNP_Setc=new HashSet<Constituent>();
+		Set<Constituent> NNPS_Setc=new HashSet<Constituent>();
+		Set<Constituent> NN_Setc=new HashSet<Constituent>();
+		Set<Constituent> NNS_Setc=new HashSet<Constituent>();
 		
 		//sentence2
-		Set<String> NNP_Set2=new HashSet<String>();
-		Set<String> NNPS_Set2=new HashSet<String>();
-		Set<String> NN_Set2=new HashSet<String>();
-		Set<String> NNS_Set2=new HashSet<String>();
+		Set<Constituent> NNP_Set2c=new HashSet<Constituent>();
+		Set<Constituent> NNPS_Set2c=new HashSet<Constituent>();
+		Set<Constituent> NN_Set2c=new HashSet<Constituent>();
+		Set<Constituent> NNS_Set2c=new HashSet<Constituent>();
 		
 		//the set all nouns
-	   Set<String> Nouns_Set=new HashSet<String>();
-	   Set<String> Nouns_Set2=new HashSet<String>();
+	   Set<Constituent> Nouns_Setc=new HashSet<Constituent>();
+	   Set<Constituent> Nouns_Set2c=new HashSet<Constituent>();
 
 		
 		//verb-related POS tags
 		// Question: Do the types of verbs really matter??? 
-		Set<String> VB_Set=new HashSet<String>();
-		Set<String> VBD_Set=new HashSet<String>();
-		Set<String> VBG_Set=new HashSet<String>();
-		Set<String> VBN_Set=new HashSet<String>();
-		Set<String> VBP_Set=new HashSet<String>();
-		Set<String> VBZ_Set=new HashSet<String>();
+		Set<Constituent> VB_Setc=new HashSet<Constituent>();
+		Set<Constituent> VBD_Setc=new HashSet<Constituent>();
+		Set<Constituent> VBG_Setc=new HashSet<Constituent>();
+		Set<Constituent> VBN_Setc=new HashSet<Constituent>();
+		Set<Constituent> VBP_Setc=new HashSet<Constituent>();
+		Set<Constituent> VBZ_Setc=new HashSet<Constituent>();
 		
-		Set<String> VB_Set2=new HashSet<String>();
-		Set<String> VBD_Set2=new HashSet<String>();
-		Set<String> VBG_Set2=new HashSet<String>();
-		Set<String> VBN_Set2=new HashSet<String>();
-		Set<String> VBP_Set2=new HashSet<String>();
-		Set<String> VBZ_Set2=new HashSet<String>();
+		Set<Constituent> VB_Set2c=new HashSet<Constituent>();
+		Set<Constituent> VBD_Set2c=new HashSet<Constituent>();
+		Set<Constituent> VBG_Set2c=new HashSet<Constituent>();
+		Set<Constituent> VBN_Set2c=new HashSet<Constituent>();
+		Set<Constituent> VBP_Set2c=new HashSet<Constituent>();
+		Set<Constituent> VBZ_Set2c=new HashSet<Constituent>();
 		
 		//the set of all verbs
-		Set<String> Verbs_Set=new HashSet<String>();
-		Set<String> Verbs_Set2=new HashSet<String>();
+		Set<Constituent> Verbs_Setc=new HashSet<Constituent>();
+		Set<Constituent> Verbs_Set2c=new HashSet<Constituent>();
+		
+		
 
-
+     
 
 		
 		for(Constituent c1:cs1)
 		{
               String tag=c1.getLabel();
-              String word=c1.toString();
+              //String word=c1.toString();
               if (tag.contentEquals("NNP"))
               {
             	  cNNP++;
-            	  NNP_Set.add(word);
+            	  NNP_Setc.add(c1);
               }
               else if (tag.contentEquals("NNPS"))
               {
             	  cNNPS++;
-            	  NNPS_Set.add(word);
+            	  NNPS_Setc.add(c1);
               }
               else if (tag.contentEquals("NN"))
               {
             	  cNN++;
-            	  NN_Set.add(word);
+            	  NN_Setc.add(c1);
               }
               else if (tag.contentEquals("NNS"))
               {
             	  cNNS++;
-            	  NNS_Set.add(word);
+            	  NNS_Setc.add(c1);
               }
               else if (tag.contentEquals("VB"))
               {
             	  cVB++;
-            	  VB_Set.add(word);
+            	  VB_Setc.add(c1);
               }
               else if (tag.contentEquals("VBD"))
               {
             	  cVBD++;
-            	  VBD_Set.add(word);
+            	  VBD_Setc.add(c1);
               }
               else if (tag.contentEquals("VBG"))
               {
             	  cVBG++;
-            	  VBG_Set.add(word);
+            	  VBG_Setc.add(c1);
               }
               else if (tag.contentEquals("VBN"))
               {
             	  cVBN++;
-            	  VBN_Set.add(word);
+            	  VBN_Setc.add(c1);
               }
               else if (tag.contentEquals("VBP"))
               {
             	  cVBP++;
-            	  VBP_Set.add(word);
+            	  VBP_Setc.add(c1);
               }
               else if (tag.contentEquals("VBZ"))
               {
             	  cVBZ++;
-            	  VBZ_Set.add(word);
+            	  VBZ_Setc.add(c1);
               }
               
               if(tag.startsWith("N"))
-            	  Nouns_Set.add(word);
+            	  Nouns_Setc.add(c1);
               else if(tag.startsWith("V"))
-            	  Verbs_Set.add(word);
+            	  Verbs_Setc.add(c1);
                
 		}
 		
 		for(Constituent c2:cs2)
 		{
               String tag=c2.getLabel();
-              String word=c2.toString();
+              //String word=c2.toString();
               
               if (tag.contentEquals("NNP"))
               {
             	  cNNP2++;
-            	  NNP_Set2.add(word);
+            	  NNP_Set2c.add(c2);
               }
               else if (tag.contentEquals("NNPS"))
               {
             	  cNNPS2++;
-            	  NNPS_Set2.add(word);
+            	  NNPS_Set2c.add(c2);
               }
               else if (tag.contentEquals("NN"))
               {
             	  cNN2++;
-            	  NN_Set2.add(word);
+            	  NN_Set2c.add(c2);
               }
               else if (tag.contentEquals("NNS"))
               {
             	  cNNS2++;
-            	  NNS_Set2.add(word);
+            	  NNS_Set2c.add(c2);
               }
               else if (tag.contentEquals("VB"))
               {
             	  cVB2++;
-            	  VB_Set2.add(word);
+            	  VB_Set2c.add(c2);
               }
               else if (tag.contentEquals("VBD"))
               {
             	  cVBD2++;
-            	  VBD_Set2.add(word);
+            	  VBD_Set2c.add(c2);
               }
               else if (tag.contentEquals("VBG"))
               {
             	  cVBG2++;
-            	  VBG_Set2.add(word);
+            	  VBG_Set2c.add(c2);
               }
               else if (tag.contentEquals("VBN"))
               {
             	  cVBN2++;
-            	  VBN_Set2.add(word);
+            	  VBN_Set2c.add(c2);
               }
               else if (tag.contentEquals("VBP"))
               {
             	  cVBP2++;
-            	  VBP_Set2.add(word);
+            	  VBP_Set2c.add(c2);
               }
               else if (tag.contentEquals("VBZ"))
               {
             	  cVBZ2++;
-            	  VBZ_Set2.add(word);
+            	  VBZ_Set2c.add(c2);
               }
               
               if(tag.startsWith("N"))
-            	  Nouns_Set2.add(word);
+            	  Nouns_Set2c.add(c2);
               else if(tag.startsWith("V"))
-            	  Verbs_Set2.add(word);
+            	  Verbs_Set2c.add(c2);
                
 		}
 		
@@ -406,14 +412,14 @@ public class Model2XXX extends Model {
 		 * 
 		 */
 		
-		if(NNP_Set.size()<NNP_Set2.size())
+		if(NNP_Setc.size()<NNP_Set2c.size())
 		{
 		loop_outer:
-			for(String w:NNP_Set)
+			for(Constituent c:NNP_Setc)
 			{
-				for(String w2:NNP_Set2)
+				for(Constituent c2:NNP_Set2c)
 				{
-					if(w.compareToIgnoreCase(w2)==0)
+					if(constituentMatch(c,c2)>threshold)
 					{
 						score=0.2;
 						break loop_outer;
@@ -424,11 +430,11 @@ public class Model2XXX extends Model {
 		else
 		{
 			loop_outer:
-				for(String w:NNP_Set2)
+				for(Constituent c:NNP_Set2c)
 				{
-					for(String w2:NNP_Set)
+					for(Constituent c2:NNP_Setc)
 					{
-						if(w.compareToIgnoreCase(w2)==0)
+						if(constituentMatch(c,c2)>threshold)
 						{
 							score=0.2;
 							break loop_outer;
@@ -446,15 +452,15 @@ public class Model2XXX extends Model {
          * Find the number of alignments of nouns between the two sentences
          * Loop through each noun in the sentence with less number of nouns. 
          */
-		if (Nouns_Set.size()<Nouns_Set2.size())
+		if (Nouns_Setc.size()<Nouns_Set2c.size())
 		{
 			
-		for (String w :Nouns_Set)
+		for (Constituent c:Nouns_Setc)
 		{
-			for(String w2:Nouns_Set2)
+			for(Constituent c2:Nouns_Set2c)
 			{
 		         //if (w.contentEquals(w2))
-		        if(m.similarity(w, w2)>0.9)	
+		        if(constituentMatch(c,c2)>threshold)	
 				{
 		        	//System.out.println(w+" "+w2);
 		            n_algn++;
@@ -466,12 +472,12 @@ public class Model2XXX extends Model {
 		}
 		else
 		{
-			for (String w :Nouns_Set2)
+			for (Constituent c :Nouns_Set2c)
 			{
-				for(String w2:Nouns_Set)
+				for(Constituent c2:Nouns_Setc)
 				{
 			         //if (w.contentEquals(w2))
-			        if(m.similarity(w, w2)>0.9)	
+			        if(constituentMatch(c,c2)>threshold)	
 					{
 			        	//System.out.println(w+" "+w2);
 			            n_algn++;
@@ -489,14 +495,14 @@ public class Model2XXX extends Model {
          * Start with Looping through each verb in the sentence with less number of verbs. 
          */
 		int v_algn=0;
-		if(Verbs_Set.size()<Verbs_Set2.size())
+		if(Verbs_Setc.size()<Verbs_Set2c.size())
 		{
-		for (String w :Verbs_Set)
+		for (Constituent c :Verbs_Setc)
 		{
-			for(String w2:Verbs_Set2)
+			for(Constituent c2:Verbs_Set2c)
 			{
 		         //if (w.contentEquals(w2))
-		        if(m.similarity(w, w2)>0.9)	
+		        if(constituentMatch(c,c2)>threshold)	
 				{
 		        	//System.out.println(w+"::::::::::::::::::::::"+w2);
 		            v_algn++;
@@ -506,14 +512,14 @@ public class Model2XXX extends Model {
 		}
 		}
 		else{
-			for (String w :Verbs_Set)
+			for (Constituent c: Verbs_Setc)
 			{
-				for(String w2:Verbs_Set2)
+				for(Constituent c2:Verbs_Set2c)
 				{
 			         //if (w.contentEquals(w2))
-			        if(m.similarity(w, w2)>0.9)	
+			        if(constituentMatch(c,c2)>threshold)	
 					{
-			        	System.out.println(w+" "+w2);
+			        	//System.out.println(c.toString()+" "+c2.toString());
 			            v_algn++;
 			            break;
 					}
@@ -553,8 +559,8 @@ public class Model2XXX extends Model {
 		int nsem_tag=0;
 		int nsem_tag2=0;
 		
-		nsem_tag=Nouns_Set.size()+Verbs_Set.size();
-		nsem_tag2=Nouns_Set2.size()+Verbs_Set2.size();
+		nsem_tag=Nouns_Setc.size()+Verbs_Setc.size();
+		nsem_tag2=Nouns_Set2c.size()+Verbs_Set2c.size();
 		
 	   double value=0;
 		
@@ -568,7 +574,7 @@ public class Model2XXX extends Model {
         }
 		
         
-        if(NNP_Set.isEmpty() && NNP_Set2.isEmpty())
+        if(NNP_Setc.isEmpty() && NNP_Set2c.isEmpty())
         {
             score=value;
         }
@@ -793,13 +799,7 @@ public class Model2XXX extends Model {
     private Instance getInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
         double[] score1 = score1(ta1, ta2);
         double[] score2 = score2(ta1, ta2);
-        double[] score3 = new double[1];
-		try {
-			score3 = score3(ta1, ta2);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        double[] score3 = score3(ta1, ta2);
         double[] score4 = score4(ta1, ta2);
         
         return combineAttributes(score1, score2, score3, score4, gs);
