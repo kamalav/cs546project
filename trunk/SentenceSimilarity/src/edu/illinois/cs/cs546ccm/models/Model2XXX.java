@@ -2,6 +2,7 @@ package edu.illinois.cs.cs546ccm.models;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -804,7 +805,32 @@ public class Model2XXX extends Model {
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
 		String gsFile = getGSFileName(fileName);
 		train(gsFile);
+
+		// save feature vectors to file for (Guihua's) SVM training
+		String corpusLabel = fileName.split("[/_]")[1];
+		String svmFileName = "svm/" + corpusLabel + ".txt";
+		saveSVMFeaturesToFile(svmFileName);
+
 		super.computeAndSaveOutputToFile(fileName);
+	}
+
+	private void saveSVMFeaturesToFile(String fileName) {
+		String fileContent = featuresBuffer.toString();
+		if (fileContent.isEmpty()) {
+			System.err.println("SVM features buffer is empty!");
+		} else {
+			try {
+				File file = new File(fileName);
+				FileOutputStream fop = new FileOutputStream(file);
+				fop.write(fileContent.getBytes());
+				fop.flush();
+				fop.close();
+				System.out.println("SVM features are saved into file: "
+						+ fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private static String getGSFileName(String fileName) {
@@ -814,4 +840,5 @@ public class Model2XXX extends Model {
 		else
 			return "input/STS.gs.Temp.txt";
 	}
+
 }
