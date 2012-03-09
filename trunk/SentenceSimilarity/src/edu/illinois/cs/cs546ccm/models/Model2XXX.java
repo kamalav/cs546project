@@ -410,7 +410,6 @@ public class Model2XXX extends Model {
 			}
 		}
 
-		System.out.println("Hello");
 
 		int n_algn = 0;
 
@@ -489,8 +488,6 @@ public class Model2XXX extends Model {
 			if (v_algn > 0)
 				score = 0.4;
 		}
-		// System.out.println("The number of matched verbs is:"+v_algn);
-
 		/*
 		 * Heuristic #3: The more alignments of words with POS tags in the same
 		 * category, the higher is the score.
@@ -520,7 +517,6 @@ public class Model2XXX extends Model {
 			score = score + value * 0.6;
 		}
 
-		System.out.println("The score for this pair of sentence is " + score);
 		scores[0] = score;
 		return scores;
 		// return new double[] {score};
