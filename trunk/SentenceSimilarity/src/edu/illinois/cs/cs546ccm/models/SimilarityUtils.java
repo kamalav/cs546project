@@ -16,8 +16,8 @@ public class SimilarityUtils {
 	static EntityComparison entityComparator;
 
 	static {
-		String metricHost = "handy.cs.uiuc.edu";// "greedy.cs.uiuc.edu";
-		int metricPort = 29023;// 9988;
+		String metricHost = "greedy.cs.uiuc.edu";
+		int metricPort = 9988;
 		wnSimClient = new XmlRpcMetricClient("WNSim", metricHost, metricPort);
 
 		wordSimilarityMap = SerializationUtils
@@ -39,6 +39,13 @@ public class SimilarityUtils {
 		if (wordSimilarityMap.containsKey(key)) {
 			return wordSimilarityMap.get(key);
 		} else {
+			if (true) {
+				if (word1.equals(word2)) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
 			MetricResponse response = wnSimClient.compareStrings(word1, word2);
 			wordSimilarityMap.put(key, response.score);
 			return response.score;
@@ -51,11 +58,9 @@ public class SimilarityUtils {
 	}
 
 	public static void main(String[] args) {
-		MetricResponse response = wnSimClient
-				.compareStrings("slaughter", "not");
+		MetricResponse response = wnSimClient.compareStrings("beauty", "lady");
 		System.out.println(response.score);
-		System.out.println(namedEntitySimilarity("United States", "US"));
+		System.out.println(namedEntitySimilarity("United States", "American"));
 	}
 
 }
-
