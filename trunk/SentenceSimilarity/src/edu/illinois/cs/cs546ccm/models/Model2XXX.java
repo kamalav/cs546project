@@ -11,6 +11,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.functions.LibLINEAR;
 import weka.classifiers.functions.LibSVM;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -42,7 +43,7 @@ public class Model2XXX extends Model {
 
 	private Instances defineFeatures() {
 		// Declare the attribute vector
-		attributes = new FastVector(10);
+		attributes = new FastVector(15);
 
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
@@ -75,7 +76,7 @@ public class Model2XXX extends Model {
 
 		// Gold-standard score (class value)
 		// Code snippet for handling multi-class classification
-		FastVector fvClassVal = new FastVector(21);
+		FastVector fvClassVal = new FastVector(51);
 		for (int i = 0; i < 5; i++) {
 			for (int j = 0; j < 10; j++) {
 				fvClassVal.addElement(i + "." + j);
@@ -95,12 +96,13 @@ public class Model2XXX extends Model {
 
 	@Override
 	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
-		Instance example = getInstance(ta1, ta2, 0.0);
+		Instance example = getInstance(ta1, ta2, 0.0, false);
 		example.setDataset(data);
 		double similarity;
 		try {
 			double[] res = model.distributionForInstance(example);
 			similarity = model.classifyInstance(example) / 10;
+			
 		} catch (Exception e) {
 			System.err.println("Exception while trying to classify");
 			similarity = -1;
@@ -744,7 +746,7 @@ public class Model2XXX extends Model {
 				double gs = gs_arr.get(i);
 				trainInstance(ta1, ta2, gs);
 			}
-			// model = new M5P();
+			//model = new LibLINEAR();
 			model = new LibSVM();
 			model.buildClassifier(data);
 		} catch (Exception e) {
@@ -755,22 +757,22 @@ public class Model2XXX extends Model {
 	}
 
 	private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
-		data.add(getInstance(ta1, ta2, gs));
+		data.add(getInstance(ta1, ta2, gs, true));
 	}
 
 	private Instance getInstance(TextAnnotation ta1, TextAnnotation ta2,
-			double gs) {
+			double gs, boolean isTrain) {
 		double[] score1 = score1(ta1, ta2);
 		double[] score2 = score2(ta1, ta2);
 		double[] score3 = score3(ta1, ta2);
 		double[] score4 = score4(ta1, ta2);
 		double[] score5 = score5(ta1, ta2);
 
-		return combineAttributes(score1, score2, score3, score4, score5, gs);
+		return combineAttributes(score1, score2, score3, score4, score5, gs, isTrain);
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
-			double[] score3, double[] score4, double[] score5, double gs) {
+			double[] score3, double[] score4, double[] score5, double gs, boolean isTrain) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
 
@@ -808,7 +810,8 @@ public class Model2XXX extends Model {
 		inst.setValue(count, parseGS(gs));
 		// System.out.println(inst);
 
-		svmFeatureBuffer.append(sb.toString() + "\n");
+		if(isTrain)
+		    svmFeatureBuffer.append(sb.toString() + "\n");
 		return inst;
 	}
 
