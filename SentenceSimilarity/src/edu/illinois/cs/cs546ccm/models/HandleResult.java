@@ -27,6 +27,7 @@ public class HandleResult {
 		return score;
 	}
 	
+	//output the result model 2 and model 3
 	public static void outputResult(String datasetname)
 	{
 		try {
@@ -45,7 +46,7 @@ public class HandleResult {
 			String[] ss = line1.split(" ");
 			double resultscore=label_to_score(ss[0]);
 			String re=String.valueOf(resultscore);
-			re=re+" "+"100"+"\n";
+			re=re+"\t"+"100"+"\n";
 			fop.write(re.getBytes());
 			
 		}
@@ -58,6 +59,8 @@ public class HandleResult {
 		}
 		
 	}
+	
+	//analyze the model 2 and model 3
 	public static void printBadpair(String datasetname) {
 		try {
 			String SVMoutput="svm/STS.svm."+datasetname;
@@ -109,6 +112,60 @@ public class HandleResult {
 			in1.close();
 			in2.close();
 			in3.close();
+			in4.close();
+			System.out.println(count);
+			System.out.println(num);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//analyze the model LLM
+	public static void analyzeLLM(String datasetname)
+	{
+		try {
+			String LLMoutput="output/"+datasetname+"_teamCCM_modelLLM.txt";
+			String inputfile="input/STS.input."+datasetname+".txt";
+			String gsfile="input/STS.gs."+datasetname+".txt";
+			
+			FileInputStream fstream1 = new FileInputStream(LLMoutput);
+			DataInputStream in1 = new DataInputStream(fstream1);
+			BufferedReader br_LLMoutput = new BufferedReader(new InputStreamReader(in1));
+			
+			FileInputStream fstream2 = new FileInputStream(inputfile);
+			DataInputStream in2 = new DataInputStream(fstream2);
+			BufferedReader br_inputfile = new BufferedReader(new InputStreamReader(in2));
+			
+			FileInputStream fstream3 = new FileInputStream(gsfile);
+			DataInputStream in3 = new DataInputStream(fstream3);
+			BufferedReader br_gsfile = new BufferedReader(new InputStreamReader(in3));
+			
+			String line1;
+			int count=0;
+			int num=0;
+			while ((line1 = br_LLMoutput.readLine()) != null) {
+				num++;
+				String[] ss = line1.split("\t");
+				//System.out.println(ss[0]);
+				double resultscore=Double.parseDouble(ss[0]);
+				
+				String gs=br_gsfile.readLine();
+				//System.out.println(num);
+				double gsdouble=Double.parseDouble(gs);
+				
+				
+				String sentencepair=br_inputfile.readLine();
+				
+				//the difference between the gs and our score is larger than 2, then output this pair
+				if(Math.abs(resultscore-gsdouble)>2) {
+					count++;
+					System.out.println("Sentence pair:"+sentencepair);
+					System.out.println("gs:"+gs+" "+"our score:"+ss[0]);
+				}
+			}
+			in1.close();
+			in2.close();
+			in3.close();
 			System.out.println(count);
 			System.out.println(num);
 		} catch (IOException e) {
@@ -151,8 +208,9 @@ public class HandleResult {
 	}*/
 	
 	public static void main(String[] args) throws IOException {
-		printBadpair("MSRpar");
-		outputResult("MSRpar");
+		printBadpair("SMTeuroparl");
+		outputResult("SMTeuroparl");
+		//analyzeLLM("MSRpar");
 	
 	}
 }
