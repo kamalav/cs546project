@@ -50,7 +50,6 @@ public class Model2XXX extends Model {
 		attributes.addElement(new Attribute("r3"));
 		attributes.addElement(new Attribute("r4"));
 		attributes.addElement(new Attribute("r5"));
-		attributes.addElement(new Attribute("r6"));
 		//
 
 		// Guihua's features
@@ -590,8 +589,10 @@ public class Model2XXX extends Model {
 	}
 
 	private double[] score1(TextAnnotation ta1, TextAnnotation ta2) {
-		return new double[] { ta1.getText().split(" ").length,
-				ta2.getText().split(" ").length, wordsInCommon(ta1, ta2),
+	    double l1 = ta1.getTokens().length;
+	    double l2 = ta2.getTokens().length;
+	    double length_ratio = Math.min(l1/l2, l2/l1);
+		return new double[] { length_ratio, wordsInCommon(ta1, ta2),
 				wordsInCommon(ta2, ta1), srlSimilarity(ta1, ta2),
 				srlSimilarity(ta2, ta1) };
 	}
@@ -599,7 +600,7 @@ public class Model2XXX extends Model {
 	private static double srlSimilarity(TextAnnotation ta1, TextAnnotation ta2) {
 		// for temporary testing, to be replaced
 		if (!ta1.hasView(ViewNames.SRL) || !ta2.hasView(ViewNames.SRL)) {
-			return 0;
+			return 0.5;
 		}
 
 		// TODO Auto-generated method stub
@@ -660,10 +661,6 @@ public class Model2XXX extends Model {
 		for (int i = c1.getStartSpan(); i < c1.getEndSpan(); i++) {
 			t1 += c1.getTextAnnotation().getToken(i) + " ";
 		}
-		if (t1.trim().equals(c1.getTextAnnotation().getText())) {
-			System.out.println(t1.trim());
-			System.out.println(c1.getTextAnnotation().getText());
-		}
 		String t2 = "";
 		for (int i = c2.getStartSpan(); i < c2.getEndSpan(); i++) {
 			t2 += c2.getTextAnnotation().getToken(i) + " ";
@@ -676,8 +673,9 @@ public class Model2XXX extends Model {
 		for (String w1 : ws1) {
 			double point = 0;
 			for (String w2 : ws2) {
-				if (w1.equals(w2))
-					point = 1;
+				double temp = SimilarityUtils.wordSimilairty(w1, w2);
+				if(temp > point)
+				    point = temp;
 			}
 			score = score + point;
 		}
