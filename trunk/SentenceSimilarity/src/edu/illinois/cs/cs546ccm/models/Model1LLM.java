@@ -23,7 +23,7 @@ public class Model1LLM extends Model {
 	public double similarity(TextAnnotation ta1, TextAnnotation ta2) {
 		try {
 			String source = ta1.getText();
-			int line = Integer.parseInt(ta1.getId());
+			int line = Integer.parseInt(ta1.getId()) / 2;
 			// get cached score, not using reversed score
 			double llmScore = getLLMScores(line)[0];
 			int scale = 5;
