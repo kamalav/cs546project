@@ -42,6 +42,7 @@ public class SimilarityUtils {
 		MetricResponse response = wnSimClient
 				.compareStrings("slaughter", "not");
 		System.out.println(response.score);
+		
 	}
 
 }
