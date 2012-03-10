@@ -2,6 +2,7 @@ package edu.illinois.cs.cs546ccm.models;
 
 import java.util.HashMap;
 
+import edu.illinois.cs.cogcomp.entityComparison.core.EntityComparison;
 import edu.illinois.cs.cogcomp.mrcs.comparators.XmlRpcMetricClient;
 import edu.illinois.cs.cogcomp.mrcs.dataStructures.MetricResponse;
 
@@ -12,12 +13,18 @@ public class SimilarityUtils {
 	static XmlRpcMetricClient wnSimClient;
 	static HashMap<String, Double> wordSimilarityMap;
 
+	static EntityComparison entityComparator;
+
 	static {
 		String metricHost = "handy.cs.uiuc.edu";// "greedy.cs.uiuc.edu";
 		int metricPort = 29023;// 9988;
 		wnSimClient = new XmlRpcMetricClient("WNSim", metricHost, metricPort);
+
 		wordSimilarityMap = SerializationUtils
 				.deserializeHashMap(SIMILARITY_MAP_FILE_NAME);
+
+		entityComparator = new EntityComparison();
+
 	}
 
 	public static HashMap<String, Double> getWordSimilarityMap() {
@@ -38,11 +45,17 @@ public class SimilarityUtils {
 		}
 	}
 
+	public static double namedEntitySimilarity(String entity1, String entity2) {
+		entityComparator.compare(entity1, entity2);
+		return entityComparator.getScore();
+	}
+
 	public static void main(String[] args) {
 		MetricResponse response = wnSimClient
 				.compareStrings("slaughter", "not");
 		System.out.println(response.score);
-		
+		System.out.println(namedEntitySimilarity("United States", "US"));
 	}
 
 }
+
