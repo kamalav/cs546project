@@ -11,7 +11,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.LibLINEAR;
 import weka.classifiers.functions.LibSVM;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -102,7 +101,7 @@ public class Model2XXX extends Model {
 		try {
 			double[] res = model.distributionForInstance(example);
 			similarity = model.classifyInstance(example) / 10;
-			
+
 		} catch (Exception e) {
 			System.err.println("Exception while trying to classify");
 			similarity = -1;
@@ -154,10 +153,10 @@ public class Model2XXX extends Model {
 			// System.out.println(c1.getLabel() + " " + c1.toString());
 			double point = 0;
 			for (Constituent c2 : cs2) {
-				String entity1 = cs1.toString();
-				String entity2 = cs2.toString();
-				double p = 1;
-				// SimilarityUtils.namedEntitySimilarity(entity1,entity2);
+				String entity1 = c1.toString();
+				String entity2 = c2.toString();
+				double p = SimilarityUtils.namedEntitySimilarity(entity1,
+						entity2);
 				if (p > point)
 					point = p;
 				System.out.println(entity1 + " vs " + entity2 + ": " + point);
@@ -746,7 +745,7 @@ public class Model2XXX extends Model {
 				double gs = gs_arr.get(i);
 				trainInstance(ta1, ta2, gs);
 			}
-			//model = new LibLINEAR();
+			// model = new LibLINEAR();
 			model = new LibSVM();
 			model.buildClassifier(data);
 		} catch (Exception e) {
@@ -768,11 +767,13 @@ public class Model2XXX extends Model {
 		double[] score4 = score4(ta1, ta2);
 		double[] score5 = score5(ta1, ta2);
 
-		return combineAttributes(score1, score2, score3, score4, score5, gs, isTrain);
+		return combineAttributes(score1, score2, score3, score4, score5, gs,
+				isTrain);
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
-			double[] score3, double[] score4, double[] score5, double gs, boolean isTrain) {
+			double[] score3, double[] score4, double[] score5, double gs,
+			boolean isTrain) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
 
@@ -810,8 +811,8 @@ public class Model2XXX extends Model {
 		inst.setValue(count, parseGS(gs));
 		// System.out.println(inst);
 
-		if(isTrain)
-		    svmFeatureBuffer.append(sb.toString() + "\n");
+		if (isTrain)
+			svmFeatureBuffer.append(sb.toString() + "\n");
 		return inst;
 	}
 
