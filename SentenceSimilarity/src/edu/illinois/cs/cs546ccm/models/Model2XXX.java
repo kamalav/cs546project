@@ -50,6 +50,8 @@ public class Model2XXX extends Model {
 		attributes.addElement(new Attribute("r3"));
 		attributes.addElement(new Attribute("r4"));
 		attributes.addElement(new Attribute("r5"));
+        attributes.addElement(new Attribute("r6"));
+        attributes.addElement(new Attribute("r7"));
 		//
 
 		// Guihua's features
@@ -593,11 +595,36 @@ public class Model2XXX extends Model {
 	    double l2 = ta2.getTokens().length;
 	    double length_ratio = Math.min(l1/l2, l2/l1);
 		return new double[] { length_ratio, wordsInCommon(ta1, ta2),
-				wordsInCommon(ta2, ta1), srlSimilarity(ta1, ta2),
+				wordsInCommon(ta2, ta1), wordSimilarity(ta1, ta2),
+                wordSimilarity(ta2, ta1), srlSimilarity(ta1, ta2),
 				srlSimilarity(ta2, ta1) };
 	}
 
-	private static double srlSimilarity(TextAnnotation ta1, TextAnnotation ta2) {
+	private static double wordSimilarity(TextAnnotation ta2, TextAnnotation ta1) {
+	    View v1 = ta1.getView(ViewNames.SENTENCE);
+        View v2 = ta2.getView(ViewNames.SENTENCE);
+
+        String[] ws1 = v1.getConstituents().get(0).getTextAnnotation()
+                .getTokens();
+        String[] ws2 = v2.getConstituents().get(0).getTextAnnotation()
+                .getTokens();
+
+        double score = 0;
+        for (String w1 : ws1) {
+            double point = 0;
+            for (String w2 : ws2) {
+                double temp = SimilarityUtils.wordSimilairty(w1, w2);
+                if(temp > point)
+                    point = temp;
+            }
+            score = score + point;
+        }
+        if (ws1.length > 0)
+            return score / ws1.length;
+        return score;
+    }
+
+    private static double srlSimilarity(TextAnnotation ta1, TextAnnotation ta2) {
 		// for temporary testing, to be replaced
 		if (!ta1.hasView(ViewNames.SRL) || !ta2.hasView(ViewNames.SRL)) {
 			return 0.5;
