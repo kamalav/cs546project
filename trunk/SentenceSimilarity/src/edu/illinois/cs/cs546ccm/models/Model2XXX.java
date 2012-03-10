@@ -843,9 +843,9 @@ public class Model2XXX extends Model {
 	@Override
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
 		String gsFile = getGSFileName(fileName);
+        resetSVMFeatureBuffer();
 		train(gsFile);
 
-		resetSVMFeatureBuffer();
 
 		super.computeAndSaveOutputToFile(fileName);
 
