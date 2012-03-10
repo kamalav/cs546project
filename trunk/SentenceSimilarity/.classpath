@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-simple-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/weka.jar"/>
 	<classpathentry kind="lib" path="lib/libsvm.jar"/>
+	<classpathentry kind="lib" path="lib/EntityComparison.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
