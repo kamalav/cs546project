@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 
 import edu.illinois.cs.cogcomp.edison.sentences.TextAnnotation;
 import edu.illinois.cs.cogcomp.mrcs.comparators.LlmComparator;
@@ -22,11 +23,9 @@ public class SerializationUtils {
 	 */
 	public static TextAnnotation[] deserializeTextAnnotations(String fileName) {
 		TextAnnotation[] tas = null;
-		FileInputStream fis = null;
-		ObjectInputStream in = null;
 		try {
-			fis = new FileInputStream(fileName);
-			in = new ObjectInputStream(fis);
+			FileInputStream fis = new FileInputStream(fileName);
+			ObjectInputStream in = new ObjectInputStream(fis);
 			int count = in.readInt();
 			tas = new TextAnnotation[count];
 			for (int i = 0; i < count; i++) {
@@ -47,11 +46,9 @@ public class SerializationUtils {
 	 * serialize all the TextAnnotaion objects for each line in corpus to a file
 	 */
 	public static void serializeTextAnnotations(Corpus corpus, String fileName) {
-		FileOutputStream fos = null;
-		ObjectOutputStream out = null;
 		try {
-			fos = new FileOutputStream(fileName);
-			out = new ObjectOutputStream(fos);
+			FileOutputStream fos = new FileOutputStream(fileName);
+			ObjectOutputStream out = new ObjectOutputStream(fos);
 			int count = corpus.get_total_size();
 			out.writeInt(count);
 			int size = corpus.get_pairs_size();
@@ -125,4 +122,33 @@ public class SerializationUtils {
 		}
 	}
 
+	public static void serializeHashMap(HashMap<String, Double> map,
+			String fileName) {
+		try {
+			FileOutputStream fos = new FileOutputStream(fileName);
+			ObjectOutputStream out = new ObjectOutputStream(fos);
+			out.writeObject(map);
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public static HashMap<String, Double> deserializeHashMap(String fileName) {
+		HashMap<String, Double> map = null;
+		try {
+			FileInputStream fis = new FileInputStream(fileName);
+			ObjectInputStream in = new ObjectInputStream(fis);
+			// deserialize objects from file
+			System.out.println("Deserializing hash map from " + fileName
+					+ "...");
+			map = (HashMap<String, Double>) in.readObject();
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
 }
