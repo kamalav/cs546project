@@ -2,7 +2,9 @@ package edu.illinois.cs.cs546ccm.models;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -25,7 +27,37 @@ public class HandleResult {
 		return score;
 	}
 	
-	
+	public static void outputResult(String datasetname)
+	{
+		try {
+		String SVMoutput="svm/STS.svm."+datasetname;
+		
+		FileInputStream fstream1 = new FileInputStream(SVMoutput);
+		DataInputStream in1 = new DataInputStream(fstream1);
+		BufferedReader br_SVMoutput = new BufferedReader(new InputStreamReader(in1));
+		
+		String modeloutput="output/"+datasetname+"teamCCM_model2.txt";
+		File file = new File(modeloutput);
+		FileOutputStream fop = new FileOutputStream(file);
+		
+		String line1;
+		while ((line1 = br_SVMoutput.readLine()) != null) {
+			String[] ss = line1.split(" ");
+			double resultscore=label_to_score(ss[0]);
+			String re=String.valueOf(resultscore);
+			re=re+" "+"100"+"\n";
+			fop.write(re.getBytes());
+			fop.flush();
+		}
+		
+		fop.close();
+		}
+		
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 	public static void printBadpair(String datasetname) {
 		try {
 			String SVMoutput="svm/STS.svm."+datasetname;
