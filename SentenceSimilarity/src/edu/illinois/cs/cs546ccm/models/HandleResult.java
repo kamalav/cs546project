@@ -47,9 +47,9 @@ public class HandleResult {
 			String re=String.valueOf(resultscore);
 			re=re+" "+"100"+"\n";
 			fop.write(re.getBytes());
-			fop.flush();
+			
 		}
-		
+		fop.flush();
 		fop.close();
 		}
 		
