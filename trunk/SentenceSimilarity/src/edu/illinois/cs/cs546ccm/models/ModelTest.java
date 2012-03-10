@@ -63,5 +63,11 @@ public class ModelTest {
 				model.computeAndSaveOutputToFile(fileName);
 			}
 		}
+
+		// serialize word similarity map
+
+		SerializationUtils.serializeHashMap(
+				SimilarityUtils.getWordSimilarityMap(),
+				SimilarityUtils.SIMILARITY_MAP_FILE_NAME);
 	}
 }
