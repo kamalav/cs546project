@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class HandleResult {
 
@@ -74,7 +75,39 @@ public class HandleResult {
 		}
 	}
 	
-	
+/*	public static void z_score_svm(String datasetname)
+	{
+		String original="svm/"+datasetname+".txt";
+		
+		try{
+		
+		FileInputStream fstream1 = new FileInputStream(original);
+		DataInputStream in1 = new DataInputStream(fstream1);
+		BufferedReader br_SVMoriginal = new BufferedReader(new InputStreamReader(in1));
+		
+		String line1;
+		int count=1;
+		line1 = br_SVMoriginal.readLine();
+		String[] ss=line1.split(" ");
+		int featurenum=ss.length-1;
+		double totalsquare[]=new double[featurenum];
+		double total[]=new double[featurenum];
+		totalsquare[0]=0;
+		total[0]=0;
+		
+		while ((line1 = br_SVMoriginal.readLine()) != null) {
+			count++;
+			String[] ss = line1.split(" ");
+			for(int i=1; i<ss.length;i++){
+				
+			}
+		}
+		
+		
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+	}*/
 	
 	public static void main(String[] args) throws IOException {
 		printBadpair("Temp");
