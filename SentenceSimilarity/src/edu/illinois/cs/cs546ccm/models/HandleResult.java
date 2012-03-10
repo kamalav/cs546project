@@ -36,7 +36,7 @@ public class HandleResult {
 		DataInputStream in1 = new DataInputStream(fstream1);
 		BufferedReader br_SVMoutput = new BufferedReader(new InputStreamReader(in1));
 		
-		String modeloutput="output/"+datasetname+"teamCCM_model2.txt";
+		String modeloutput="output/"+datasetname+"_teamCCM_model2.txt";
 		File file = new File(modeloutput);
 		FileOutputStream fop = new FileOutputStream(file);
 		
@@ -82,11 +82,17 @@ public class HandleResult {
 			BufferedReader br_feature = new BufferedReader(new InputStreamReader(in4));
 			
 			String line1;
+			int count=0;
+			int num=0;
 			while ((line1 = br_SVMoutput.readLine()) != null) {
+				num++;
 				String[] ss = line1.split(" ");
 				double resultscore=label_to_score(ss[0]);
+				//System.out.println(ss[0]);
 				String gs=br_gsfile.readLine();
+				//System.out.println(num);
 				double gsdouble=Double.parseDouble(gs);
+				
 				
 				String sentencepair=br_inputfile.readLine();
 				
@@ -94,6 +100,7 @@ public class HandleResult {
 				
 				//the difference between the gs and our score is larger than 2, then output this pair
 				if(Math.abs(resultscore-gsdouble)>2) {
+					count++;
 					System.out.println("Sentence pair:"+sentencepair);
 					System.out.println("gs:"+gs+" "+"our score:"+ss[0]);
 					System.out.println("our feature's score:"+featureline);
@@ -102,6 +109,8 @@ public class HandleResult {
 			in1.close();
 			in2.close();
 			in3.close();
+			System.out.println(count);
+			System.out.println(num);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -142,7 +151,8 @@ public class HandleResult {
 	}*/
 	
 	public static void main(String[] args) throws IOException {
-		printBadpair("Temp");
+		printBadpair("MSRpar");
+		outputResult("MSRpar");
 	
 	}
 }
