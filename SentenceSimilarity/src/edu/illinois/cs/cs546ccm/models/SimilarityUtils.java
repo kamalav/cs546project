@@ -46,7 +46,6 @@ public class SimilarityUtils {
 		} else {
 			MetricResponse response = wnSimClient.compareStrings(word1, word2);
 			wordSimilarityMap.put(key, response.score);
-			System.out.println(word1 + " vs " + word2 + ": " + response.score);
 			return response.score;
 		}
 	}
