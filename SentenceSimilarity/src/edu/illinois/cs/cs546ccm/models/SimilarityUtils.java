@@ -1,5 +1,6 @@
 package edu.illinois.cs.cs546ccm.models;
 
+import java.io.File;
 import java.util.HashMap;
 
 import edu.illinois.cs.cogcomp.entityComparison.core.EntityComparison;
@@ -17,11 +18,15 @@ public class SimilarityUtils {
 
 	static {
 		String metricHost = "greedy.cs.uiuc.edu";
-		int metricPort = 9988;
+		int metricPort = 5988;
 		wnSimClient = new XmlRpcMetricClient("WNSim", metricHost, metricPort);
 
-		wordSimilarityMap = SerializationUtils
-				.deserializeHashMap(SIMILARITY_MAP_FILE_NAME);
+		if ((new File(SIMILARITY_MAP_FILE_NAME)).exists()) {
+			wordSimilarityMap = SerializationUtils
+					.deserializeHashMap(SIMILARITY_MAP_FILE_NAME);
+		} else {
+			wordSimilarityMap = new HashMap<String, Double>();
+		}
 
 		entityComparator = new EntityComparison();
 
@@ -39,15 +44,9 @@ public class SimilarityUtils {
 		if (wordSimilarityMap.containsKey(key)) {
 			return wordSimilarityMap.get(key);
 		} else {
-			if (true) {
-				if (word1.equals(word2)) {
-					return 1;
-				} else {
-					return 0;
-				}
-			}
 			MetricResponse response = wnSimClient.compareStrings(word1, word2);
 			wordSimilarityMap.put(key, response.score);
+			System.out.println(word1 + " vs " + word2 + ": " + response.score);
 			return response.score;
 		}
 	}
