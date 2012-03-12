@@ -159,7 +159,8 @@ public class Model2XXX extends Model {
 						entity2);
 				if (p > point)
 					point = p;
-				System.out.println(entity1 + " vs " + entity2 + ": " + point);
+				// System.out.println(entity1 + " vs " + entity2 + ": " +
+				// point);
 			}
 			score += point;
 		}
@@ -843,9 +844,8 @@ public class Model2XXX extends Model {
 	@Override
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
 		String gsFile = getGSFileName(fileName);
-        resetSVMFeatureBuffer();
+		resetSVMFeatureBuffer();
 		train(gsFile);
-
 
 		super.computeAndSaveOutputToFile(fileName);
 
