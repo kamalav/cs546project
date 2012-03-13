@@ -12,6 +12,7 @@ import java.util.Set;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LibSVM;
+import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -83,9 +84,9 @@ public class Model2XXX extends Model {
 			}
 		}
 		fvClassVal.addElement("5.0");
-		attributes.addElement(new Attribute("gs_approx", fvClassVal));
-		//
-		// attributes.addElement(new Attribute("gs"));
+        //
+		// attributes.addElement(new Attribute("gs_approx", fvClassVal));
+		 attributes.addElement(new Attribute("gs"));
 		//
 
 		Instances ret = new Instances("CCM-SemanticSimilarity", attributes,
@@ -748,8 +749,8 @@ public class Model2XXX extends Model {
 				double gs = gs_arr.get(i);
 				trainInstance(ta1, ta2, gs);
 			}
-			// model = new LibLINEAR();
-			model = new LibSVM();
+			model = new M5P();
+			//model = new LibSVM();
 			model.buildClassifier(data);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -813,7 +814,8 @@ public class Model2XXX extends Model {
 			sb.append(" " + featureIndex++ + ":" + score5[i]);
 		}
 
-		inst.setValue(count, parseGS(gs));
+		//inst.setValue(count, parseGS(gs));
+		inst.setValue(count, gs);
 		// System.out.println(inst);
 
 		if (isTrain)
