@@ -24,10 +24,12 @@ public class Model1LLM extends Model {
 		try {
 			String source = ta1.getText();
 			int line = Integer.parseInt(ta1.getId()) / 2;
-			// get cached score, not using reversed score
-			double llmScore = getLLMScores(line)[0];
+			// get cached scores and then take average
+			double llmScore1 = getLLMScores(line)[0];
+			double llmScore2 = getLLMScores(line)[1];
+			double llmScore = (llmScore1 + llmScore2) / 2;
 			int scale = 5;
-			return scale * llmScore;// llm.compareStrings(source, target);
+			return scale * llmScore;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
