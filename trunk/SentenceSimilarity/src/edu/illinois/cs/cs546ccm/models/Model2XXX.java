@@ -44,6 +44,7 @@ public class Model2XXX extends Model {
 		// Declare the attribute vector
 		attributes = new FastVector(15);
 
+		
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
 		attributes.addElement(new Attribute("r2"));
@@ -664,6 +665,7 @@ public class Model2XXX extends Model {
 								point = temp;
 						}
 					}
+					score += point;
 				}
 				if (rs1.size() > 0)
 					return score / rs1.size();
@@ -783,6 +785,7 @@ public class Model2XXX extends Model {
 
 		int count = 0;
 		int featureIndex = 1;
+		
 		for (int i = 0; i < score1.length; i++) {
 			inst.setValue(count, score1[i]);
 			count++;
@@ -803,6 +806,7 @@ public class Model2XXX extends Model {
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score4[i]);
 		}
+		
 		for (int i = 0; i < score5.length; i++) {
 			inst.setValue(count, score5[i]);
 			count++;
