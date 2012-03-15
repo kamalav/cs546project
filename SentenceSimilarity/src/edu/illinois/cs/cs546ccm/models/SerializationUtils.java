@@ -72,6 +72,13 @@ public class SerializationUtils {
 		}
 	}
 
+	public static void serializeAllCorpusFoldsTextAnnotations(Corpus[] allCorpus) {
+		for (Corpus corpus : allCorpus) {
+			String fileName = "serialization_folds/" + corpus.getId() + ".sel";
+			serializeTextAnnotations(corpus, fileName);
+		}
+	}
+
 	public static double[] deserializeLLMScores(String fileName) {
 		double[] scores = null;
 		try {
