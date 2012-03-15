@@ -38,13 +38,13 @@ public class ModelTestFolds {
 			}
 		}
 
-		// do the below lines only once, when no serialization file is saved
-		SerializationUtils.serializeAllCorpusFoldsTextAnnotations(trainCorpus);
-		SerializationUtils.serializeAllCorpusFoldsTextAnnotations(testCorpus);
-
 		// for each model, generate local LLM caches
 		Corpus[] allCorpus = (Corpus[]) ArrayUtils.addAll(trainCorpus,
 				testCorpus);
+
+		// do the below lines only once, when no serialization file is saved
+		SerializationUtils.serializeAllCorpusFoldsTextAnnotations(allCorpus);
+
 		for (Corpus corpus : allCorpus) {
 			// deserialize objects from file
 			System.out.println("Deserializing text annotations for "
