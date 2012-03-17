@@ -151,20 +151,26 @@ public class Model3YYY extends Model {
 		return similarity;
 	}
 
-	private double[] score5(TextAnnotation ta1, TextAnnotation ta2) {
+	private double[] score5(TextAnnotation ta1, TextAnnotation ta2, boolean isTrain) {
 		// use cached raw LLM score as a feature
 		int line = Integer.parseInt(ta1.getId()) / 2;
-		return getLLMScores(line);
+        if(isTrain)
+            return getTrainLLMScores(line);
+        return getTestLLMScores(line);
 	}
 
-	private double[] score4(TextAnnotation ta1, TextAnnotation ta2) {
+	private double[] score4(TextAnnotation ta1, TextAnnotation ta2, boolean isTrain) {
 		// TODO Auto-generated method stub
 		// Zhijin's method
 
 		// if both do not contain NER views, use averaged LLM scores instead
 		if (!ta1.hasView(ViewNames.NER) || !ta2.hasView(ViewNames.NER)) {
 			int line = Integer.parseInt(ta1.getId()) / 2;
-			double[] llmPairScores = getLLMScores(line);
+            double[] llmPairScores;
+            if(isTrain)
+                llmPairScores = getTrainLLMScores(line);
+            else
+                llmPairScores = getTestLLMScores(line);
 			int sizeDiff = ta1.hasView(ViewNames.NER) ? ta1
 					.getView(ViewNames.NER).getConstituents().size() : ta2
 					.hasView(ViewNames.NER) ? ta2.getView(ViewNames.NER)
@@ -775,28 +781,29 @@ public class Model3YYY extends Model {
 	}
 
 	public void train(String gsFile) {
-		try {
-			ArrayList<Double> gs_arr = getGSscores(gsFile);
-			int pairs = tas.length / 2;
-			if (gs_arr.size() != pairs) {
-				System.out
-						.println("Corpus does not match gold-standard; aborting training");
-				return;
-			}
-			for (int i = 0; i < pairs; i++) {
-				TextAnnotation ta1 = this.tas[2 * i];
-				TextAnnotation ta2 = this.tas[2 * i + 1];
-				double gs = gs_arr.get(i);
-				trainInstance(ta1, ta2, gs);
-			}
-			model = new M5P();
-			// model = new LibSVM();
-			model.buildClassifier(data);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Training failed.");
-			e.printStackTrace();
-		}
+	    resetSVMFeatureBuffer();
+        try {
+            ArrayList<Double> gs_arr = getGSscores(gsFile);
+            int pairs = train_tas.length / 2;
+            if (gs_arr.size() != pairs) {
+                System.out
+                        .println("Corpus does not match gold-standard; aborting training");
+                return;
+            }
+            for (int i = 0; i < pairs; i++) {
+                TextAnnotation ta1 = this.train_tas[2 * i];
+                TextAnnotation ta2 = this.train_tas[2 * i + 1];
+                double gs = gs_arr.get(i);
+                trainInstance(ta1, ta2, gs);
+            }
+            model = new M5P();
+            // model = new LibSVM();
+            model.buildClassifier(data);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            System.out.println("Training failed.");
+            e.printStackTrace();
+        }
 	}
 
 	private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
@@ -808,8 +815,8 @@ public class Model3YYY extends Model {
 		double[] score1 = score1(ta1, ta2);
 		double[] score2 = score2(ta1, ta2);
 		double[] score3 = score3(ta1, ta2);
-		double[] score4 = score4(ta1, ta2);
-		double[] score5 = score5(ta1, ta2);
+		double[] score4 = score4(ta1, ta2, isTrain);
+		double[] score5 = score5(ta1, ta2, isTrain);
 
 		// below are just added for model 3
 		double[] score6 = score_number(ta1, ta2);
@@ -914,9 +921,6 @@ public class Model3YYY extends Model {
 
 	@Override
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
-		String gsFile = getGSFileName(fileName);
-		resetSVMFeatureBuffer();
-		train(gsFile);
 
 		super.computeAndSaveOutputToFile(fileName);
 
