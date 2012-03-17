@@ -826,8 +826,7 @@ public class Model2XXX extends Model {
 		inst.setValue(count, gs);
 		// System.out.println(inst);
 
-		if (isTrain)
-			svmFeatureBuffer.append(sb.toString() + "\n");
+		svmFeatureBuffer.append(sb.toString() + "\n");
 		return inst;
 	}
 
