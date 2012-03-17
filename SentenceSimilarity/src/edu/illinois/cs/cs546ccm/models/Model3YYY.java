@@ -1361,6 +1361,67 @@ public class Model3YYY extends Model {
 
 		return score;
 	}
+	
+	//guihua, compare NP and VP fpr short sentences.
+	private double[] score_NP_VP(TextAnnotation ta1, TextAnnotation ta2){
+			double[] score=new double[4];
+			for(int i=0;i<4;i++) score[i]=0;
+			
+			if (!ta1.hasView(ViewNames.PARSE_STANFORD) || !ta2.hasView(ViewNames.PARSE_STANFORD)) {
+				return score;
+			}
+			
+			View v1=ta1.getView(ViewNames.PARSE_STANFORD);
+			View v2=ta2.getView(ViewNames.PARSE_STANFORD);
+			List<Constituent> r1=v1.getConstituents();
+			List<Constituent> r2=v2.getConstituents();
+			
+			int count1=0, count2=0;
+			String np1="";
+			String vp1="";
+			String np2="";
+			String vp2="";
+			for(Constituent e1: r1){
+				if(e1.getLabel().equalsIgnoreCase("NP")) { count1++; if(count1==1) np1=e1.toString();}
+				if(e1.getLabel().endsWith("VP")) {count2++; if(count2==1) vp1=e1.toString();}	
+			}
+			count1=0; count2=0;
+			for(Constituent e2: r2){
+				if(e2.getLabel().equalsIgnoreCase("NP")) { count1++; if(count1==1) np2=e2.toString();}
+				if(e2.getLabel().endsWith("VP")) {count2++; if(count2==1) vp2=e2.toString();}	
+			}
+			
+			String[] npwords1=np1.split(" ");
+			String[] npwords2=np2.split(" ");
+			String[] vpwords1=vp1.split(" ");
+			String[] vpwords2=vp2.split(" ");
+			
+			if((npwords1.length+vpwords1.length)<15&&(npwords2.length+vpwords2.length)<15){
+				//compare NP, VP respectively
+				score[0]=(allStringCompare(npwords1, npwords2)+allStringCompare(npwords2, npwords1))/2;
+				score[1]=(allStringCompare(vpwords1, vpwords2)+allStringCompare(vpwords2, vpwords1))/2;
+				score[2]=LLM_comparator(npwords1, npwords2);
+				score[3]=LLM_comparator(vpwords1, vpwords2);
+			}
+
+			return score;
+		}
+		
+		private double allStringCompare(String[] s1, String[] s2){
+			double score = 0;
+			for (String w1 : s1) {
+				double point = 0;
+				for (String w2 : s2) {
+					double temp = SimilarityUtils.wordSimilairty(w1, w2);
+					if (temp > point)
+						point = temp;
+				}
+				score = score + point;
+			}
+			if (s1.length > 0)
+				return score / s1.length;
+			return score;
+		}
 
 	double LLM_comparator(String[] s1, String[] s2) {
 		double scale = 1;
