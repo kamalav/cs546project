@@ -34,25 +34,24 @@ public class Model3YYY extends Model {
 	Classifier model;
 
 	StringBuffer svmFeatureBuffer;
-	Set<String> Stopwords=new HashSet<String>();
-
+	Set<String> Stopwords = new HashSet<String>();
 
 	public Model3YYY() {
 		super("YYY");
 		data = defineFeatures();
 		resetSVMFeatureBuffer();
 		try {
-			FileInputStream fstream1 = new FileInputStream("config/llmStopwords.txt");
-	
-		
-		DataInputStream in1 = new DataInputStream(fstream1);
-		BufferedReader br_stopwords = new BufferedReader(new InputStreamReader(in1));
-		
-		String line;
-        while ((line=br_stopwords.readLine())!=null)
-        {
-        	Stopwords.add(line);           	
-        }
+			FileInputStream fstream1 = new FileInputStream(
+					"config/llmStopwords.txt");
+
+			DataInputStream in1 = new DataInputStream(fstream1);
+			BufferedReader br_stopwords = new BufferedReader(
+					new InputStreamReader(in1));
+
+			String line;
+			while ((line = br_stopwords.readLine()) != null) {
+				Stopwords.add(line);
+			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -60,7 +59,7 @@ public class Model3YYY extends Model {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private void resetSVMFeatureBuffer() {
@@ -151,26 +150,28 @@ public class Model3YYY extends Model {
 		return similarity;
 	}
 
-	private double[] score5(TextAnnotation ta1, TextAnnotation ta2, boolean isTrain) {
+	private double[] score5(TextAnnotation ta1, TextAnnotation ta2,
+			boolean isTrain) {
 		// use cached raw LLM score as a feature
 		int line = Integer.parseInt(ta1.getId()) / 2;
-        if(isTrain)
-            return getTrainLLMScores(line);
-        return getTestLLMScores(line);
+		if (isTrain)
+			return getTrainLLMScores(line);
+		return getTestLLMScores(line);
 	}
 
-	private double[] score4(TextAnnotation ta1, TextAnnotation ta2, boolean isTrain) {
+	private double[] score4(TextAnnotation ta1, TextAnnotation ta2,
+			boolean isTrain) {
 		// TODO Auto-generated method stub
 		// Zhijin's method
 
 		// if both do not contain NER views, use averaged LLM scores instead
 		if (!ta1.hasView(ViewNames.NER) || !ta2.hasView(ViewNames.NER)) {
 			int line = Integer.parseInt(ta1.getId()) / 2;
-            double[] llmPairScores;
-            if(isTrain)
-                llmPairScores = getTrainLLMScores(line);
-            else
-                llmPairScores = getTestLLMScores(line);
+			double[] llmPairScores;
+			if (isTrain)
+				llmPairScores = getTrainLLMScores(line);
+			else
+				llmPairScores = getTestLLMScores(line);
 			int sizeDiff = ta1.hasView(ViewNames.NER) ? ta1
 					.getView(ViewNames.NER).getConstituents().size() : ta2
 					.hasView(ViewNames.NER) ? ta2.getView(ViewNames.NER)
@@ -781,29 +782,29 @@ public class Model3YYY extends Model {
 	}
 
 	public void train(String gsFile) {
-	    resetSVMFeatureBuffer();
-        try {
-            ArrayList<Double> gs_arr = getGSscores(gsFile);
-            int pairs = train_tas.length / 2;
-            if (gs_arr.size() != pairs) {
-                System.out
-                        .println("Corpus does not match gold-standard; aborting training");
-                return;
-            }
-            for (int i = 0; i < pairs; i++) {
-                TextAnnotation ta1 = this.train_tas[2 * i];
-                TextAnnotation ta2 = this.train_tas[2 * i + 1];
-                double gs = gs_arr.get(i);
-                trainInstance(ta1, ta2, gs);
-            }
-            model = new M5P();
-            // model = new LibSVM();
-            model.buildClassifier(data);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            System.out.println("Training failed.");
-            e.printStackTrace();
-        }
+		resetSVMFeatureBuffer();
+		try {
+			ArrayList<Double> gs_arr = getGSscores(gsFile);
+			int pairs = train_tas.length / 2;
+			if (gs_arr.size() != pairs) {
+				System.out
+						.println("Corpus does not match gold-standard; aborting training");
+				return;
+			}
+			for (int i = 0; i < pairs; i++) {
+				TextAnnotation ta1 = this.train_tas[2 * i];
+				TextAnnotation ta2 = this.train_tas[2 * i + 1];
+				double gs = gs_arr.get(i);
+				trainInstance(ta1, ta2, gs);
+			}
+			model = new M5P();
+			// model = new LibSVM();
+			model.buildClassifier(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Training failed.");
+			e.printStackTrace();
+		}
 	}
 
 	private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
@@ -973,13 +974,13 @@ public class Model3YYY extends Model {
 		for (int i = 0; i < 24; i++) {
 			if (i < 12) {
 				score[i] = score1[i];
-				System.out.print(String.valueOf(score[i]) + ' ');
+				// System.out.print(String.valueOf(score[i]) + ' ');
 			} else {
 				score[i] = score2[i - 12];
-				System.out.print(String.valueOf(score[i]) + ' ');
+				// System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
-		System.out.println();
+		// System.out.println();
 		return score;
 	}
 
@@ -1172,13 +1173,13 @@ public class Model3YYY extends Model {
 		for (int i = 0; i < 10; i++) {
 			if (i < 5) {
 				score[i] = score1[i];
-				System.out.print(String.valueOf(score[i]) + ' ');
+				// System.out.print(String.valueOf(score[i]) + ' ');
 			} else {
 				score[i] = score2[i - 5];
-				System.out.print(String.valueOf(score[i]) + ' ');
+				// System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
-		System.out.println();
+		// System.out.println();
 		return score;
 	}
 
@@ -1305,13 +1306,13 @@ public class Model3YYY extends Model {
 		for (int i = 0; i < 4; i++) {
 			if (i < 2) {
 				score[i] = score1[i];
-				System.out.print(String.valueOf(score[i]) + ' ');
+				// System.out.print(String.valueOf(score[i]) + ' ');
 			} else {
 				score[i] = score2[i - 2];
-				System.out.print(String.valueOf(score[i]) + ' ');
+				// System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
-		System.out.println();
+		// System.out.println();
 		return score;
 	}
 
@@ -1371,73 +1372,62 @@ public class Model3YYY extends Model {
 
 		return score;
 	}
-	
-	double LLM_comparator(String[] s1, String[] s2){
-		double scale=1;
-		double score1=0;
-		double score2=0;
-		
-		int nstw1=0;
-		int nstw2=0;
-		
-		for (int i=0;i<s1.length;i++)
-		{
-			 double max=0;
-			 if (Stopwords.contains(s1[i]))
-			 { 
-				 nstw1++;  
-			 }
-			 else{
-				 
-			for(int j=0;j<s2.length;j++)
-			{   
-              if(!Stopwords.contains(s2[j]))
-              {
-				String w1=s1[i];
-				String w2=s2[j];
-				double temp=SimilarityUtils.wordSimilairty(w1, w2);
-                if (temp>max)
-                	max=temp;
-			
-              }
-             }
-			 
-			 }
-			  score1=score1+max;
+
+	double LLM_comparator(String[] s1, String[] s2) {
+		double scale = 1;
+		double score1 = 0;
+		double score2 = 0;
+
+		int nstw1 = 0;
+		int nstw2 = 0;
+
+		for (int i = 0; i < s1.length; i++) {
+			double max = 0;
+			if (Stopwords.contains(s1[i])) {
+				nstw1++;
+			} else {
+
+				for (int j = 0; j < s2.length; j++) {
+					if (!Stopwords.contains(s2[j])) {
+						String w1 = s1[i];
+						String w2 = s2[j];
+						double temp = SimilarityUtils.wordSimilairty(w1, w2);
+						if (temp > max)
+							max = temp;
+
+					}
+				}
+
+			}
+			score1 = score1 + max;
 		}
-		for (int i=0;i<s2.length;i++)
-		{
-			double max=0;
-			if(Stopwords.contains(s2[i]))
-			{
+		for (int i = 0; i < s2.length; i++) {
+			double max = 0;
+			if (Stopwords.contains(s2[i])) {
 				nstw2++;
+			} else {
+				for (int j = 0; j < s1.length; j++) {
+					if (!Stopwords.contains(s1[j])) {
+						String w1 = s2[i];
+						String w2 = s1[j];
+						double temp = SimilarityUtils.wordSimilairty(w1, w2);
+						if (temp > max)
+							max = temp;
+					}
+				}
 			}
-			else 
-			{
-			for(int j=0;j<s1.length;j++)
-			{
-				if(!Stopwords.contains(s1[j]))
-				{
-				String w1=s2[i];
-				String w2=s1[j];
-				double temp=SimilarityUtils.wordSimilairty(w1, w2);
-                if (temp>max)
-                	max=temp;
-				}			
-			}
-			}
-			  score2=score2+max;
+			score2 = score2 + max;
 		}
-		
-		double score=0;
-		
-	    int nlength1=s1.length-nstw1;
-	    int nlength2=s2.length-nstw2;
-		
-		if((nlength1!=0)&&(nlength2!=0))
-			score=(score1/nlength1+score2/nlength2)/2;		
-		
-		return scale * score;		
+
+		double score = 0;
+
+		int nlength1 = s1.length - nstw1;
+		int nlength2 = s2.length - nstw2;
+
+		if ((nlength1 != 0) && (nlength2 != 0))
+			score = (score1 / nlength1 + score2 / nlength2) / 2;
+
+		return scale * score;
 	}
 
 }
