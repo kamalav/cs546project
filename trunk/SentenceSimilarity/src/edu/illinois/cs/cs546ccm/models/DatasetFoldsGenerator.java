@@ -128,6 +128,91 @@ public class DatasetFoldsGenerator {
 
 	}
 
+	public static void splitFoldsLLMScores(Corpus corpus, int folds) {
+		String id = corpus.getId();
+
+		File[] trainLLMFiles = new File[folds];
+		File[] testLLMFiles = new File[folds];
+
+		for (int i = 0; i < folds; i++) {
+			String fileName = "serialization_folds/" + id + "." + i
+					+ ".train.llm";
+			trainLLMFiles[i] = new File(fileName);
+			fileName = "serialization_folds/" + id + "." + i + ".test.llm";
+			testLLMFiles[i] = new File(fileName);
+		}
+
+		try {
+			// for getting the source scores
+			String sourceFileName = "serialization/" + id + ".llm";
+			double[] scores = SerializationUtils
+					.deserializeLLMScores(sourceFileName);
+
+			for (int i = 0; i < folds; i++) {
+				// for test
+				String fileName = "train_test_sets/STS.input." + id + ".txt__"
+						+ i + "/test.txt";
+				FileInputStream fstream = new FileInputStream(fileName);
+				DataInputStream in = new DataInputStream(fstream);
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(in));
+				int l = 0;
+				String line;
+				while ((line = br.readLine()) != null) {
+					l++;
+				}
+				StringBuffer sb = new StringBuffer(new String(l * 2 + "\n"));
+				fstream = new FileInputStream(fileName);
+				in = new DataInputStream(fstream);
+				BufferedReader br2 = new BufferedReader(new InputStreamReader(
+						in));
+				while ((line = br2.readLine()) != null) {
+					String[] ss = line.split("\t");
+					int lineInSourceFile = Integer.parseInt(ss[1]);
+					sb.append(scores[2 * lineInSourceFile] + "\t"
+							+ scores[2 * lineInSourceFile + 1] + "\n");
+				}
+				in.close();
+				FileOutputStream fop = new FileOutputStream(testLLMFiles[i]);
+				String fileContent = sb.toString();
+				fop.write(fileContent.getBytes());
+				fop.flush();
+				fop.close();
+
+				// for train
+				fileName = "train_test_sets/STS.input." + id + ".txt__" + i
+						+ "/train.txt";
+				fstream = new FileInputStream(fileName);
+				in = new DataInputStream(fstream);
+				br = new BufferedReader(new InputStreamReader(in));
+				l = 0;
+				while ((line = br.readLine()) != null) {
+					l++;
+				}
+				sb = new StringBuffer(new String(l * 2 + "\n"));
+				fstream = new FileInputStream(fileName);
+				in = new DataInputStream(fstream);
+				br2 = new BufferedReader(new InputStreamReader(in));
+				while ((line = br2.readLine()) != null) {
+					String[] ss = line.split("\t");
+					int lineInSourceFile = Integer.parseInt(ss[1]);
+					sb.append(scores[2 * lineInSourceFile] + "\t"
+							+ scores[2 * lineInSourceFile + 1] + "\n");
+				}
+				in.close();
+				fop = new FileOutputStream(trainLLMFiles[i]);
+				fileContent = sb.toString();
+				fop.write(fileContent.getBytes());
+				fop.flush();
+				fop.close();
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	public static void main(String[] args) throws FileNotFoundException {
 		Corpus[] allCorpus = {
 				new Corpus("input/STS.input.MSRvid.txt", "MSRvid"),
@@ -137,6 +222,7 @@ public class DatasetFoldsGenerator {
 		int folds = 5;
 		for (Corpus corpus : allCorpus) {
 			splitDatasetToFolds(corpus, folds);
+			splitFoldsLLMScores(corpus, folds);
 		}
 	}
 
