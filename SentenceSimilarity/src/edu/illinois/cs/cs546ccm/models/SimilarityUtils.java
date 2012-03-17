@@ -17,8 +17,8 @@ public class SimilarityUtils {
 	static EntityComparison entityComparator;
 
 	static {
-		String metricHost = "greedy.cs.uiuc.edu";
-		int metricPort = 5988;
+		String metricHost = "handy.cs.uiuc.edu";
+		int metricPort = 29022;
 		wnSimClient = new XmlRpcMetricClient("WNSim", metricHost, metricPort);
 
 		if ((new File(SIMILARITY_MAP_FILE_NAME)).exists()) {
