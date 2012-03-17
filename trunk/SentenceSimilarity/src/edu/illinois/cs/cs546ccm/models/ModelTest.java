@@ -61,6 +61,7 @@ public class ModelTest {
 				// compute result and save to file
 				fileName = "output/" + corpus.getId() + "_teamCCM_model"
 						+ model.getId() + ".txt";
+				model.train(corpus.getId());
 				model.computeAndSaveOutputToFile(fileName);
 			}
 		}

@@ -91,7 +91,7 @@ public class ModelTestFolds {
 				fileName = "output_folds/" + dataset + "_" + model.getId()
 						+ "_CCM_" + fold + ".txt";
 				System.out.println(fileName);
-				model.train("input_folds/STS.gs."+train.getId()+".txt");
+				model.train(train.getId());
 				model.computeAndSaveOutputToFile(fileName);
 			}
 		}
