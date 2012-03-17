@@ -68,7 +68,7 @@ public class Model3YYY extends Model {
 
 	private Instances defineFeatures() {
 		// Declare the attribute vector
-		attributes = new FastVector(53);
+		attributes = new FastVector(57);
 
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
@@ -112,8 +112,12 @@ public class Model3YYY extends Model {
 		// features about SRL predicates
 		for (int i = 1; i <= 4; i++)
 			attributes.addElement(new Attribute("s" + i));
-		//
+		// features about NP VP compare respectively for short sentences
+		for (int i=1; i<=4; i++)
+			attributes.addElement(new Attribute("k"+i));
+		
 
+		
 		// Gold-standard score (class value)
 		// Code snippet for handling multi-class classification
 		FastVector fvClassVal = new FastVector(51);
@@ -827,14 +831,15 @@ public class Model3YYY extends Model {
 		double[] score6 = score_number(ta1, ta2);
 		double[] score7 = score_dependency(ta1, ta2);
 		double[] score8 = score_predicateofSRL(ta1, ta2);
+		double[] score9=score_NP_VP(ta1, ta2);
 
 		return combineAttributes(score1, score2, score3, score4, score5,
-				score6, score7, score8, gs, isTrain);
+				score6, score7, score8, score9, gs, isTrain);
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
 			double[] score3, double[] score4, double[] score5, double[] score6,
-			double[] score7, double[] score8, double gs, boolean isTrain) {
+			double[] score7, double[] score8, double[] score9, double gs, boolean isTrain) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
 
@@ -889,6 +894,12 @@ public class Model3YYY extends Model {
 			inst.setValue(count, score8[i]);
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score8[i]);
+		}
+		
+		for (int i = 0; i < score9.length; i++) {
+			inst.setValue(count, score9[i]);
+			count++;
+			sb.append(" " + featureIndex++ + ":" + score9[i]);
 		}
 
 		// inst.setValue(count, parseGS(gs));
