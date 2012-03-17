@@ -8,13 +8,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.Hashtable;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.LibSVM;
 import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -46,9 +43,8 @@ public class Model3YYY extends Model {
 
 	private Instances defineFeatures() {
 		// Declare the attribute vector
-		attributes = new FastVector(15);
+		attributes = new FastVector(53);
 
-		
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
 		attributes.addElement(new Attribute("r2"));
@@ -78,6 +74,21 @@ public class Model3YYY extends Model {
 		attributes.addElement(new Attribute("l2"));
 		//
 
+		// features about quantity comparison
+		for (int i = 1; i <= 24; i++)
+			attributes.addElement(new Attribute("n" + i));
+		//
+
+		// features about dependency parser
+		for (int i = 1; i <= 10; i++)
+			attributes.addElement(new Attribute("d" + i));
+		//
+
+		// features about SRL predicates
+		for (int i = 1; i <= 4; i++)
+			attributes.addElement(new Attribute("s" + i));
+		//
+
 		// Gold-standard score (class value)
 		// Code snippet for handling multi-class classification
 		FastVector fvClassVal = new FastVector(51);
@@ -87,9 +98,9 @@ public class Model3YYY extends Model {
 			}
 		}
 		fvClassVal.addElement("5.0");
-        //
+		//
 		// attributes.addElement(new Attribute("gs_approx", fvClassVal));
-		 attributes.addElement(new Attribute("gs"));
+		attributes.addElement(new Attribute("gs"));
 		//
 
 		Instances ret = new Instances("CCM-SemanticSimilarity", attributes,
@@ -753,7 +764,7 @@ public class Model3YYY extends Model {
 				trainInstance(ta1, ta2, gs);
 			}
 			model = new M5P();
-			//model = new LibSVM();
+			// model = new LibSVM();
 			model.buildClassifier(data);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -774,23 +785,28 @@ public class Model3YYY extends Model {
 		double[] score4 = score4(ta1, ta2);
 		double[] score5 = score5(ta1, ta2);
 
-		return combineAttributes(score1, score2, score3, score4, score5, gs,
-				isTrain);
+		// below are just added for model 3
+		double[] score6 = score_number(ta1, ta2);
+		double[] score7 = score_dependency(ta1, ta2);
+		double[] score8 = score_predicateofSRL(ta1, ta2);
+
+		return combineAttributes(score1, score2, score3, score4, score5,
+				score6, score7, score8, gs, isTrain);
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
-			double[] score3, double[] score4, double[] score5, double gs,
-			boolean isTrain) {
+			double[] score3, double[] score4, double[] score5, double[] score6,
+			double[] score7, double[] score8, double gs, boolean isTrain) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
 
 		StringBuffer sb = new StringBuffer("");
-		//sb.append(HandleResult.score_to_label(gs));
+		// sb.append(HandleResult.score_to_label(gs));
 		sb.append(String.valueOf(gs));
 
 		int count = 0;
 		int featureIndex = 1;
-		
+
 		for (int i = 0; i < score1.length; i++) {
 			inst.setValue(count, score1[i]);
 			count++;
@@ -811,14 +827,33 @@ public class Model3YYY extends Model {
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score4[i]);
 		}
-		
+
 		for (int i = 0; i < score5.length; i++) {
 			inst.setValue(count, score5[i]);
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score5[i]);
 		}
 
-		//inst.setValue(count, parseGS(gs));
+		// below are just added for model 3
+		for (int i = 0; i < score6.length; i++) {
+			inst.setValue(count, score6[i]);
+			count++;
+			sb.append(" " + featureIndex++ + ":" + score6[i]);
+		}
+
+		for (int i = 0; i < score7.length; i++) {
+			inst.setValue(count, score7[i]);
+			count++;
+			sb.append(" " + featureIndex++ + ":" + score7[i]);
+		}
+
+		for (int i = 0; i < score8.length; i++) {
+			inst.setValue(count, score8[i]);
+			count++;
+			sb.append(" " + featureIndex++ + ":" + score8[i]);
+		}
+
+		// inst.setValue(count, parseGS(gs));
 		inst.setValue(count, gs);
 		// System.out.println(inst);
 
@@ -860,8 +895,8 @@ public class Model3YYY extends Model {
 		super.computeAndSaveOutputToFile(fileName);
 
 		// save feature vectors to file for (Guihua's) SVM training
-		String corpusLabel = fileName.split("[/_]")[1];
-		String svmFileName = "svm/" + corpusLabel + ".txt";
+		String svmFileName = "svm_folds/"
+				+ fileName.substring(fileName.indexOf("/") + 1);
 		saveSVMFeaturesToFile(svmFileName);
 	}
 
@@ -890,400 +925,421 @@ public class Model3YYY extends Model {
 		return "input/STS.gs." + corpusLabel + ".txt";
 	}
 
-	
-	//guihua, calculate the number's feature
+	// guihua, calculate the number's feature
 	private double[] score_number(TextAnnotation ta1, TextAnnotation ta2) {
-		double score[]=new double[24];
-		for(int i=0;i<24;i++) score[i]=0;
-		double score1[]=new double[12];
-		for(int i=0;i<12;i++) score1[i]=0;
-		double score2[]=new double[12];
-		for(int i=0;i<12;i++) score2[i]=0;
-		
-		score1=score_number1(ta1,ta2);
-		score2=score_number1(ta2,ta1);
-		
-		for(int i=0;i<24;i++){
-			if(i<12)
-			{
-				score[i]=score1[i];
-				System.out.print(String.valueOf(score[i])+' ');
-			}
-			else
-			{
-				score[i]=score2[i-12];
-				System.out.print(String.valueOf(score[i])+' ');
+		double score[] = new double[24];
+		for (int i = 0; i < 24; i++)
+			score[i] = 0;
+		double score1[] = new double[12];
+		for (int i = 0; i < 12; i++)
+			score1[i] = 0;
+		double score2[] = new double[12];
+		for (int i = 0; i < 12; i++)
+			score2[i] = 0;
+
+		score1 = score_number1(ta1, ta2);
+		score2 = score_number1(ta2, ta1);
+
+		for (int i = 0; i < 24; i++) {
+			if (i < 12) {
+				score[i] = score1[i];
+				System.out.print(String.valueOf(score[i]) + ' ');
+			} else {
+				score[i] = score2[i - 12];
+				System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
 		System.out.println();
-		return score;	
+		return score;
 	}
-	
-	private double[] score_number1(TextAnnotation ta1, TextAnnotation ta2)
-	{
-		double score[]=new double[12];
-		for(int i=0;i<12;i++){score[i]=0;}
-		try{
-		View v1=ta1.getView(ViewNames.DEPENDENCY);
-		View v2=ta2.getView(ViewNames.DEPENDENCY);
-		
-		List<Relation> r1=v1.getRelations();
-		List<Relation> r2=v2.getRelations();
-		int countN=0;
-		
-		for(Relation e1: r1)
-		{
-			String relation_name=e1.getRelationName();
-			String e1source=e1.getSource().toString();
-			String e1target=e1.getTarget().toString();
-			
-			boolean isNumber=false;
-			String e1number="", e1other="";
-			if(checkNumber(e1source))
-			{
-				isNumber=true; e1number=getNumber(e1source); e1other=e1target;
-			}
-			if(checkNumber(e1target))
-			{
-				isNumber=true; e1number=getNumber(e1target); e1other=e1source;
-			}
-			
-			if(isNumber)
-			{
-				countN++;
-				boolean same=false;
-				for(Relation e2: r2)
-				{
-					String relation_name2=e2.getRelationName();
-					String e2source=e2.getSource().toString();
-					String e2target=e2.getTarget().toString();
-					
-					boolean isNumber2=false;
-					String e2number="", e2other="";
-					if(checkNumber(e2source))
-					{
-						isNumber2=true; e2number=getNumber(e2source); e2other=e2target;
-					}
-					if(checkNumber(e2target))
-					{
-						isNumber2=true; e2number=getNumber(e2target); e2other=e2source;
-					}
-					
-					if(isNumber2)
-					{
-						try{
-						if(SimilarityUtils.wordSimilairty(e1other, e2other)>0.9){
-							//(1)relation_name are same
-							if(relation_name.equalsIgnoreCase(relation_name2))
-							{
-								if(Math.abs(Double.parseDouble(e1number)-Double.parseDouble(e2number))<=1){
-									score[0]=score[0]+1;
-									same=true;
+
+	private double[] score_number1(TextAnnotation ta1, TextAnnotation ta2) {
+		double score[] = new double[12];
+		for (int i = 0; i < 12; i++) {
+			score[i] = 0;
+		}
+		try {
+			View v1 = ta1.getView(ViewNames.DEPENDENCY);
+			View v2 = ta2.getView(ViewNames.DEPENDENCY);
+
+			List<Relation> r1 = v1.getRelations();
+			List<Relation> r2 = v2.getRelations();
+			int countN = 0;
+
+			for (Relation e1 : r1) {
+				String relation_name = e1.getRelationName();
+				String e1source = e1.getSource().toString();
+				String e1target = e1.getTarget().toString();
+
+				boolean isNumber = false;
+				String e1number = "", e1other = "";
+				if (checkNumber(e1source)) {
+					isNumber = true;
+					e1number = getNumber(e1source);
+					e1other = e1target;
+				}
+				if (checkNumber(e1target)) {
+					isNumber = true;
+					e1number = getNumber(e1target);
+					e1other = e1source;
+				}
+
+				if (isNumber) {
+					countN++;
+					boolean same = false;
+					for (Relation e2 : r2) {
+						String relation_name2 = e2.getRelationName();
+						String e2source = e2.getSource().toString();
+						String e2target = e2.getTarget().toString();
+
+						boolean isNumber2 = false;
+						String e2number = "", e2other = "";
+						if (checkNumber(e2source)) {
+							isNumber2 = true;
+							e2number = getNumber(e2source);
+							e2other = e2target;
+						}
+						if (checkNumber(e2target)) {
+							isNumber2 = true;
+							e2number = getNumber(e2target);
+							e2other = e2source;
+						}
+
+						if (isNumber2) {
+							try {
+								if (SimilarityUtils.wordSimilairty(e1other,
+										e2other) > 0.9) {
+									// (1)relation_name are same
+									if (relation_name
+											.equalsIgnoreCase(relation_name2)) {
+										if (Math.abs(Double
+												.parseDouble(e1number)
+												- Double.parseDouble(e2number)) <= 1) {
+											score[0] = score[0] + 1;
+											same = true;
+											break;
+										} else {
+											score[1] = score[1] + 1;
+											break;
+										}
+									}
+									// (2)relation_name are nothing
+									if (Math.abs(Double.parseDouble(e1number)
+											- Double.parseDouble(e2number)) <= 1) {
+										score[2] = score[2] + 1;
+										same = true;
+										break;
+									} else {
+										score[3] = score[3] + 1;
+										break;
+									}
+								}
+								// just compare the number
+								if (Math.abs(Double.parseDouble(e1number)
+										- Double.parseDouble(e2number)) <= 1) {
+									score[4] = score[4] + 1;
+									same = true;
 									break;
 								}
-								else{ score[1]=score[1]+1; break; }
+							} catch (Exception e) {
+								System.out.println(e1number + ' ' + e2number);
 							}
-							//(2)relation_name are nothing
-							if(Math.abs(Double.parseDouble(e1number)-Double.parseDouble(e2number))<=1){
-								score[2]=score[2]+1;
-								same=true;
-								break;
-							}
-							else{ score[3]=score[3]+1; break;}
-						}
-						//just compare the number
-						if(Math.abs(Double.parseDouble(e1number)-Double.parseDouble(e2number))<=1){
-							score[4]=score[4]+1; same=true; break;
-						}
-						}
-						catch (Exception e) {
-							System.out.println(e1number+' '+e2number);
 						}
 					}
+					if (same == false)
+						score[5] = score[5] + 1;
 				}
-				if(same==false) score[5]=score[5]+1;
 			}
-		}
-		if(countN>0){
-			for(int i=0;i<6;i++){
-				score[i+6]=score[i]/countN;
+			if (countN > 0) {
+				for (int i = 0; i < 6; i++) {
+					score[i + 6] = score[i] / countN;
+				}
 			}
-		}
-		return score;
-		}
-		catch (Exception e) {
+			return score;
+		} catch (Exception e) {
 			System.out.println("can't get dependency view");
 			return score;
 		}
 	}
-	
-	private boolean checkNumber(String argument)
-	{
-		if(argument.matches("[^\n]*[0-9][^\n]*"))
-		{
-			if(argument.matches("[$,.0-9]*")) return true;
-			if(argument.contains("-"))
-			{
-				String[] s=argument.split("-");
-				if(s[0].matches("[0-9.]*")&&!s[1].matches("[0-9.]*"))
-				{
+
+	private boolean checkNumber(String argument) {
+		if (argument.matches("[^\n]*[0-9][^\n]*")) {
+			if (argument.matches("[$,.0-9]*"))
+				return true;
+			if (argument.contains("-")) {
+				String[] s = argument.split("-");
+				if (s[0].matches("[0-9.]*") && !s[1].matches("[0-9.]*")) {
 					return true;
-				}
-				else return false;
-			}
-			else{
-				
-				String a1=argument.replaceFirst("US", "");
-				if(a1.matches("[0-9.]*")) return true;
-				else{
-					a1=argument.replaceFirst("NO.", "");
-					if(a1.matches("[0-9]*")) return true;
-					else{
-						if(argument.matches("[0-9.]*[a-z.]*"))
-						{
+				} else
+					return false;
+			} else {
+
+				String a1 = argument.replaceFirst("US", "");
+				if (a1.matches("[0-9.]*"))
+					return true;
+				else {
+					a1 = argument.replaceFirst("NO.", "");
+					if (a1.matches("[0-9]*"))
+						return true;
+					else {
+						if (argument.matches("[0-9.]*[a-z.]*")) {
 							return true;
 						}
 					}
 				}
 			}
 			return false;
-				
+
 		}
 		return false;
 	}
-	
-	private String getNumber(String argument){
-		if(argument.matches("[^\n]*[0-9][^\n]*"))
-		{
-			if(argument.matches("[$,.0-9]*")) {
-				String s=argument.replaceAll("[$]", ""); s=s.replaceAll("[,]", "");
+
+	private String getNumber(String argument) {
+		if (argument.matches("[^\n]*[0-9][^\n]*")) {
+			if (argument.matches("[$,.0-9]*")) {
+				String s = argument.replaceAll("[$]", "");
+				s = s.replaceAll("[,]", "");
 				return s;
 			}
-			if(argument.contains("-"))
-			{
-				String[] s=argument.split("-");
-				if(s[0].matches("[0-9.]*")&&!s[1].matches("[0-9.]*"))
-				{
+			if (argument.contains("-")) {
+				String[] s = argument.split("-");
+				if (s[0].matches("[0-9.]*") && !s[1].matches("[0-9.]*")) {
 					return s[0];
 				}
-			}
-			else{
-				
-				String a1=argument.replaceFirst("US", "");
-				if(a1.matches("[0-9.]*")) return a1;
-				else{
-					a1=argument.replaceFirst("NO.", "");
-					if(a1.matches("[0-9]*")) return a1;
-					else{
-						if(argument.matches("[0-9.]*[a-z.]*"))
-						{
+			} else {
+
+				String a1 = argument.replaceFirst("US", "");
+				if (a1.matches("[0-9.]*"))
+					return a1;
+				else {
+					a1 = argument.replaceFirst("NO.", "");
+					if (a1.matches("[0-9]*"))
+						return a1;
+					else {
+						if (argument.matches("[0-9.]*[a-z.]*")) {
 							return argument.replaceAll("[a-z]", "");
 						}
 					}
 				}
-			}	
+			}
 		}
 		return "";
 	}
-	
-	
-	
-	
-	//compare dependency parser
-	private double[] socre_dependency(TextAnnotation ta1, TextAnnotation ta2){
-		double score[]=new double[10];
-		double score1[]=new double[5];
-		for(int i=0;i<5;i++) score1[i]=0;
-		double score2[]=new double[5];
-		for(int i=0;i<5;i++) score2[i]=0;
-		
-		score1=socre_dependency1(ta1,ta2);
-		score2=socre_dependency1(ta2,ta1);
-		
-		for(int i=0;i<10;i++){
-			if(i<5)
-			{
-				score[i]=score1[i];
-				System.out.print(String.valueOf(score[i])+' ');
-			}
-			else
-			{
-				score[i]=score2[i-5];
-				System.out.print(String.valueOf(score[i])+' ');
+
+	// compare dependency parser
+	private double[] score_dependency(TextAnnotation ta1, TextAnnotation ta2) {
+		double score[] = new double[10];
+		double score1[] = new double[5];
+		for (int i = 0; i < 5; i++)
+			score1[i] = 0;
+		double score2[] = new double[5];
+		for (int i = 0; i < 5; i++)
+			score2[i] = 0;
+
+		score1 = score_dependency1(ta1, ta2);
+		score2 = score_dependency1(ta2, ta1);
+
+		for (int i = 0; i < 10; i++) {
+			if (i < 5) {
+				score[i] = score1[i];
+				System.out.print(String.valueOf(score[i]) + ' ');
+			} else {
+				score[i] = score2[i - 5];
+				System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
 		System.out.println();
 		return score;
 	}
-	private double[] socre_dependency1(TextAnnotation ta1, TextAnnotation ta2){
-		double[] score=new double[5];
-		for(int i=0;i<5;i++){score[i]=0;}
-		try{
-		View v1=ta1.getView(ViewNames.DEPENDENCY);
-		View v2=ta2.getView(ViewNames.DEPENDENCY);
-		if(v1==null||v2==null) return score;
-		List<Relation> r1=v1.getRelations();
-		List<Relation> r2=v2.getRelations();
-		int countN=0;
-		
-		
-		for(Relation e1: r1)
-		{
-			boolean totalunmatch=false;
-			boolean totalmatch=false;
-			boolean halfmatch=false;
-			String relation_name1=e1.getRelationName();
-			String e1source=e1.getSource().toString();
-			String e1target=e1.getTarget().toString();
-			
-			double maxscore=0;
-			double minscore=0;
-			for(Relation e2: r2)
-			{
-				String relation_name2=e2.getRelationName();
-				String e2source=e2.getSource().toString();
-				String e2target=e2.getTarget().toString();
-				
-				if(relation_name1.equalsIgnoreCase(relation_name2)){
-					double temp1 = SimilarityUtils.wordSimilairty(e1source, e2source);
-					double temp2 = SimilarityUtils.wordSimilairty(e1target, e2target);
-					double tempmax=0;
-					double tempmin=0;
-					
-					//get positive score (maximum)
-					if(temp1<0) tempmax=tempmax+0;
-					else tempmax=tempmax+temp1;
-					if(temp2<0) tempmax=tempmax+0;
-					else tempmax=tempmax+temp2;
-					tempmax=tempmax/2;
-					if(tempmax>maxscore) maxscore=tempmax;
-					
-					//get negative score (minimum)
-					if(temp1>0&&temp2>0) tempmin=0;
-					else{
-						if(temp1>0.5) tempmin=tempmin-temp1;
-						if(temp1>0&&temp1<=0.5) tempmin=tempmin+0;
-						if(temp1<=0) tempmin=tempmin+temp1;
-						
-						if(temp2>0.5) tempmin=tempmin-temp2;
-						if(temp2>0&&temp1<=0.5) tempmin=tempmin+0;
-						if(temp2<=0) tempmin=tempmin+temp2;
-					}
-					if(tempmin<minscore) minscore=tempmin;
-					
-					//get the count of totally matching, half matching
-					if(temp1==1&&temp2==1&&totalmatch==false) {score[2]=score[2]+1;
-					totalmatch=true; totalunmatch=true;}
-					else{
-						if((temp1==1||temp2==1)&&halfmatch==false){
-							score[3]=score[3]+1;
-							totalunmatch=true;
-							halfmatch=true;
+
+	private double[] score_dependency1(TextAnnotation ta1, TextAnnotation ta2) {
+		double[] score = new double[5];
+		for (int i = 0; i < 5; i++) {
+			score[i] = 0;
+		}
+		try {
+			View v1 = ta1.getView(ViewNames.DEPENDENCY);
+			View v2 = ta2.getView(ViewNames.DEPENDENCY);
+			if (v1 == null || v2 == null)
+				return score;
+			List<Relation> r1 = v1.getRelations();
+			List<Relation> r2 = v2.getRelations();
+			int countN = 0;
+
+			for (Relation e1 : r1) {
+				boolean totalunmatch = false;
+				boolean totalmatch = false;
+				boolean halfmatch = false;
+				String relation_name1 = e1.getRelationName();
+				String e1source = e1.getSource().toString();
+				String e1target = e1.getTarget().toString();
+
+				double maxscore = 0;
+				double minscore = 0;
+				for (Relation e2 : r2) {
+					String relation_name2 = e2.getRelationName();
+					String e2source = e2.getSource().toString();
+					String e2target = e2.getTarget().toString();
+
+					if (relation_name1.equalsIgnoreCase(relation_name2)) {
+						double temp1 = SimilarityUtils.wordSimilairty(e1source,
+								e2source);
+						double temp2 = SimilarityUtils.wordSimilairty(e1target,
+								e2target);
+						double tempmax = 0;
+						double tempmin = 0;
+
+						// get positive score (maximum)
+						if (temp1 < 0)
+							tempmax = tempmax + 0;
+						else
+							tempmax = tempmax + temp1;
+						if (temp2 < 0)
+							tempmax = tempmax + 0;
+						else
+							tempmax = tempmax + temp2;
+						tempmax = tempmax / 2;
+						if (tempmax > maxscore)
+							maxscore = tempmax;
+
+						// get negative score (minimum)
+						if (temp1 > 0 && temp2 > 0)
+							tempmin = 0;
+						else {
+							if (temp1 > 0.5)
+								tempmin = tempmin - temp1;
+							if (temp1 > 0 && temp1 <= 0.5)
+								tempmin = tempmin + 0;
+							if (temp1 <= 0)
+								tempmin = tempmin + temp1;
+
+							if (temp2 > 0.5)
+								tempmin = tempmin - temp2;
+							if (temp2 > 0 && temp1 <= 0.5)
+								tempmin = tempmin + 0;
+							if (temp2 <= 0)
+								tempmin = tempmin + temp2;
+						}
+						if (tempmin < minscore)
+							minscore = tempmin;
+
+						// get the count of totally matching, half matching
+						if (temp1 == 1 && temp2 == 1 && totalmatch == false) {
+							score[2] = score[2] + 1;
+							totalmatch = true;
+							totalunmatch = true;
+						} else {
+							if ((temp1 == 1 || temp2 == 1)
+									&& halfmatch == false) {
+								score[3] = score[3] + 1;
+								totalunmatch = true;
+								halfmatch = true;
+							}
 						}
 					}
 				}
+
+				if (totalunmatch == false)
+					score[4] = score[4] + 1;
+				score[0] = score[0] + maxscore;
+				score[1] = score[1] + minscore;
 			}
-			
-			if(totalunmatch==false) score[4]=score[4]+1;
-			score[0]=score[0]+maxscore;
-			score[1]=score[1]+minscore;
-		}
-		
-		if(r1.size()!=0){
-			score[0]=score[0]/r1.size();
-			score[1]=score[1]/r1.size();
-			score[2]=score[2]/r1.size();
-			score[3]=score[3]/r1.size();
-			score[4]=score[4]/r1.size();
-		}
-		return score;
-		}
-		catch (Exception e) {
+
+			if (r1.size() != 0) {
+				score[0] = score[0] / r1.size();
+				score[1] = score[1] / r1.size();
+				score[2] = score[2] / r1.size();
+				score[3] = score[3] / r1.size();
+				score[4] = score[4] / r1.size();
+			}
+			return score;
+		} catch (Exception e) {
 			System.out.println("can't get dependency view");
 			return score;
 		}
 	}
-	
-	
-	//compare predicate of SRL (positive score and negatice score)
-	private double[] score_predicateofSRL(TextAnnotation ta1, TextAnnotation ta2){
-		double[] score=new double[4];
-		double score1[]=new double[2];
-		for(int i=0;i<2;i++) score1[i]=0;
-		double score2[]=new double[2];
-		for(int i=0;i<2;i++) score2[i]=0;
-		
-		score1=score_predicateofSRL1(ta1,ta2);
-		score2=score_predicateofSRL1(ta2,ta1);
-		
-		for(int i=0;i<4;i++){
-			if(i<2)
-			{
-				score[i]=score1[i];
-				System.out.print(String.valueOf(score[i])+' ');
-			}
-			else
-			{
-				score[i]=score2[i-2];
-				System.out.print(String.valueOf(score[i])+' ');
+
+	// compare predicate of SRL (positive score and negatice score)
+	private double[] score_predicateofSRL(TextAnnotation ta1, TextAnnotation ta2) {
+		double[] score = new double[4];
+		double score1[] = new double[2];
+		for (int i = 0; i < 2; i++)
+			score1[i] = 0;
+		double score2[] = new double[2];
+		for (int i = 0; i < 2; i++)
+			score2[i] = 0;
+
+		score1 = score_predicateofSRL1(ta1, ta2);
+		score2 = score_predicateofSRL1(ta2, ta1);
+
+		for (int i = 0; i < 4; i++) {
+			if (i < 2) {
+				score[i] = score1[i];
+				System.out.print(String.valueOf(score[i]) + ' ');
+			} else {
+				score[i] = score2[i - 2];
+				System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
 		System.out.println();
 		return score;
 	}
-	
-	private double[] score_predicateofSRL1(TextAnnotation ta1, TextAnnotation ta2){
-		double[] score=new double[2];
-		for(int i=0;i<2;i++) score[i]=0;
-		
+
+	private double[] score_predicateofSRL1(TextAnnotation ta1,
+			TextAnnotation ta2) {
+		double[] score = new double[2];
+		for (int i = 0; i < 2; i++)
+			score[i] = 0;
+
 		if (!ta1.hasView(ViewNames.SRL) || !ta2.hasView(ViewNames.SRL)) {
 			return score;
 		}
-		
+
 		View v1 = ta1.getView(ViewNames.SRL);
 		View v2 = ta2.getView(ViewNames.SRL);
-		List<Relation> r1=v1.getRelations();
-		List<Relation> r2=v2.getRelations();
-		
+		List<Relation> r1 = v1.getRelations();
+		List<Relation> r2 = v2.getRelations();
+
 		Set<String> Predicate1_set = new HashSet<String>();
 		Set<String> Predicate2_set = new HashSet<String>();
-		for(Relation e1: r1){
-			Constituent s=e1.getSource();
-			String p=s.toString();
-			if(!Predicate1_set.contains(p)) Predicate1_set.add(p);
+		for (Relation e1 : r1) {
+			Constituent s = e1.getSource();
+			String p = s.toString();
+			if (!Predicate1_set.contains(p))
+				Predicate1_set.add(p);
 		}
-		for(Relation e2: r2){
-			Constituent s=e2.getSource();
-			String p=s.toString();
-			if(!Predicate2_set.contains(p)) Predicate2_set.add(p);
+		for (Relation e2 : r2) {
+			Constituent s = e2.getSource();
+			String p = s.toString();
+			if (!Predicate2_set.contains(p))
+				Predicate2_set.add(p);
 		}
-		
+
 		Iterator<String> iterator1 = Predicate1_set.iterator();
-		while(iterator1.hasNext()) {
+		while (iterator1.hasNext()) {
 			String p1 = iterator1.next();
-			//System.out.println(p);
-			
-			double max=0, min=0;
-			Iterator<String> iterator2=Predicate2_set.iterator();
-			while(iterator2.hasNext()){
-				String p2=iterator2.next();
+			// System.out.println(p);
+
+			double max = 0, min = 0;
+			Iterator<String> iterator2 = Predicate2_set.iterator();
+			while (iterator2.hasNext()) {
+				String p2 = iterator2.next();
 				double temp = SimilarityUtils.wordSimilairty(p1, p2);
-				if(temp>max) max=temp;
-				if(temp<min) min=temp;
+				if (temp > max)
+					max = temp;
+				if (temp < min)
+					min = temp;
 			}
-			score[0]=score[0]+max;
-			score[1]=score[1]+min;
+			score[0] = score[0] + max;
+			score[1] = score[1] + min;
 		}
-		
-		if(Predicate1_set.size()!=0){
-			score[0]=score[0]/Predicate1_set.size();
-			score[1]=score[1]/Predicate1_set.size();
+
+		if (Predicate1_set.size() != 0) {
+			score[0] = score[0] / Predicate1_set.size();
+			score[1] = score[1] / Predicate1_set.size();
 		}
-		
+
 		return score;
 	}
-	
-	
-	
 
 }
