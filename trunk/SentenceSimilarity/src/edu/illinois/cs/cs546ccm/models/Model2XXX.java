@@ -758,7 +758,7 @@ public class Model2XXX extends Model {
             // model = new LibSVM();
             model.buildClassifier(data);
 
-            String svmFileName = "svm_folds/train_"+corpusID.split("//.")[0]+"_XXX_CCM_"+corpusID.split("//.")[1]+".txt";
+            String svmFileName = "svm_folds/train_"+corpusID.split("\\.")[0]+"_XXX_CCM_"+corpusID.split("\\.")[1]+".txt";
             saveSVMFeaturesToFile(svmFileName);
         } catch (Exception e) {
             // TODO Auto-generated catch block
