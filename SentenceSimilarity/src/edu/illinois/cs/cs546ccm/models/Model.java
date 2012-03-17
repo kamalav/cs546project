@@ -30,6 +30,9 @@ public abstract class Model {
 	 */
 	protected double[] train_llmScores;
     protected double[] test_llmScores;
+    
+    protected double[] train_llmScores_WNsim;
+    protected double[] test_llmScores_WNsim;
 
 	public void setTrainLLMScores(double[] llmScores) {
 		this.train_llmScores = llmScores;
@@ -38,19 +41,45 @@ public abstract class Model {
 	public void setTestLLMScores(double[] llmScores) {
         this.test_llmScores = llmScores;
     }
+	
+	public void setTrainLLMScores_WNsim(double[] llmScores) {
+		this.train_llmScores_WNsim = llmScores;
+	}
+	
+	public void setTestLLMScores_WNsim(double[] llmScores) {
+        this.test_llmScores_WNsim = llmScores;
+    }
 
 	/*
 	 * return two LLM scores (normal and reversed) of sentences in the line
 	 */
 	public double[] getTrainLLMScores(int line) {
 		return new double[] { this.train_llmScores[2 * line],
-				this.train_llmScores[2 * line + 1] };
+				this.train_llmScores[2 * line + 1], 
+				this.train_llmScores_WNsim[2 * line],
+				this.train_llmScores_WNsim[2 * line + 1] };
 	}
 	
 	public double[] getTestLLMScores(int line) {
         return new double[] { this.test_llmScores[2 * line],
-                this.test_llmScores[2 * line + 1] };
+                this.test_llmScores[2 * line + 1],this.test_llmScores_WNsim[2 * line],
+                this.test_llmScores_WNsim[2 * line + 1]};
     }
+	
+	/*
+	 * return two LLM_WNSim scores (normal and reversed) of sentences in the line
+	 */
+	
+	public double[] getTrainLLMScores_WNsim(int line) {
+		return new double[] { this.train_llmScores_WNsim[2 * line],
+				this.train_llmScores_WNsim[2 * line + 1]};
+	}
+	
+	public double[] getTestLLMScores_WNsim(int line) {
+        return new double[] { this.test_llmScores_WNsim[2 * line],
+                this.test_llmScores_WNsim[2 * line + 1] };
+    }
+
 
 	/*
 	 * abstract function for computing similarity score (0.0-5.0) between two
