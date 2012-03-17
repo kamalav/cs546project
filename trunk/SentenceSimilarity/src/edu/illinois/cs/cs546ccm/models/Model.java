@@ -53,17 +53,15 @@ public abstract class Model {
 	/*
 	 * return two LLM scores (normal and reversed) of sentences in the line
 	 */
+	
 	public double[] getTrainLLMScores(int line) {
 		return new double[] { this.train_llmScores[2 * line],
-				this.train_llmScores[2 * line + 1], 
-				this.train_llmScores_WNsim[2 * line],
-				this.train_llmScores_WNsim[2 * line + 1] };
+				this.train_llmScores[2 * line + 1] };
 	}
 	
 	public double[] getTestLLMScores(int line) {
         return new double[] { this.test_llmScores[2 * line],
-                this.test_llmScores[2 * line + 1],this.test_llmScores_WNsim[2 * line],
-                this.test_llmScores_WNsim[2 * line + 1]};
+                this.test_llmScores[2 * line + 1]};
     }
 	
 	/*
