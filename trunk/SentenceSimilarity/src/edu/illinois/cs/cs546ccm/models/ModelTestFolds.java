@@ -66,18 +66,26 @@ public class ModelTestFolds {
 					.deserializeTextAnnotations(fileName);
 
 			// deserialize train LLM scores from file
-			fileName = "serialization_folds/" + train.getId() + ".llm";
+			fileName = "serialization/"
+					+ train.getId().substring(0, train.getId().indexOf("."))
+					+ ".llm";
 			double[] train_llmScores = SerializationUtils
 					.deserializeLLMScores(fileName);
-			fileName = "serialization_folds/" + train.getId() + ".llm2";
+			fileName = "serialization/"
+					+ train.getId().substring(0, train.getId().indexOf("."))
+					+ ".llm2";
 			double[] train_llmScores_WNsim = SerializationUtils
 					.deserializeLLMScores(fileName);
 
 			// deserialize test LLM scores from file
-			fileName = "serialization_folds/" + test.getId() + ".llm";
+			fileName = "serialization/"
+					+ train.getId().substring(0, train.getId().indexOf("."))
+					+ ".llm";
 			double[] test_llmScores = SerializationUtils
 					.deserializeLLMScores(fileName);
-			fileName = "serialization_folds/" + test.getId() + ".llm2";
+			fileName = "serialization/"
+					+ train.getId().substring(0, train.getId().indexOf("."))
+					+ ".llm2";
 			double[] test_llmScores_WNsim = SerializationUtils
 					.deserializeLLMScores(fileName);
 
