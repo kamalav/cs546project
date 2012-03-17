@@ -847,14 +847,15 @@ public class Model3YYY extends Model {
 		double[] score7 = score_dependency(ta1, ta2);
 		double[] score8 = score_predicateofSRL(ta1, ta2);
 		double[] score9=score_NP_VP(ta1, ta2);
+		double[] score10=score_WNsim(ta1,ta2,isTrain);
 
 		return combineAttributes(score1, score2, score3, score4, score5,
-				score6, score7, score8, score9, gs, isTrain);
+				score6, score7, score8, score9, score10, gs, isTrain);
 	}
 
 	private Instance combineAttributes(double[] score1, double[] score2,
 			double[] score3, double[] score4, double[] score5, double[] score6,
-			double[] score7, double[] score8, double[] score9, double gs, boolean isTrain) {
+			double[] score7, double[] score8, double[] score9, double[] score10, double gs, boolean isTrain) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
 
@@ -915,6 +916,12 @@ public class Model3YYY extends Model {
 			inst.setValue(count, score9[i]);
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score9[i]);
+		}
+		
+		for (int i = 0; i < score10.length; i++) {
+			inst.setValue(count, score10[i]);
+			count++;
+			sb.append(" " + featureIndex++ + ":" + score10[i]);
 		}
 
 		// inst.setValue(count, parseGS(gs));
