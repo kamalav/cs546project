@@ -140,7 +140,6 @@ public class Model3YYY extends Model {
 		example.setDataset(data);
 		double similarity;
 		try {
-			double[] res = model.distributionForInstance(example);
 			similarity = model.classifyInstance(example);
 
 		} catch (Exception e) {
@@ -161,7 +160,6 @@ public class Model3YYY extends Model {
 
 	private double[] score4(TextAnnotation ta1, TextAnnotation ta2,
 			boolean isTrain) {
-		// TODO Auto-generated method stub
 		// Zhijin's method
 
 		// if both do not contain NER views, use averaged LLM scores instead
@@ -230,7 +228,6 @@ public class Model3YYY extends Model {
 	}
 
 	private double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
-		// TODO Auto-generated method stub
 		// Cedar's method
 
 		// LLM as the comparator
@@ -781,30 +778,33 @@ public class Model3YYY extends Model {
 		return 100;
 	}
 
-	public void train(String gsFile) {
-		resetSVMFeatureBuffer();
-		try {
-			ArrayList<Double> gs_arr = getGSscores(gsFile);
-			int pairs = train_tas.length / 2;
-			if (gs_arr.size() != pairs) {
-				System.out
-						.println("Corpus does not match gold-standard; aborting training");
-				return;
-			}
-			for (int i = 0; i < pairs; i++) {
-				TextAnnotation ta1 = this.train_tas[2 * i];
-				TextAnnotation ta2 = this.train_tas[2 * i + 1];
-				double gs = gs_arr.get(i);
-				trainInstance(ta1, ta2, gs);
-			}
-			model = new M5P();
-			// model = new LibSVM();
-			model.buildClassifier(data);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.err.println("Training failed.");
-			e.printStackTrace();
-		}
+	public void train(String corpusID) {
+	    resetSVMFeatureBuffer();
+        try {
+            ArrayList<Double> gs_arr = getGSscores("input_folds/STS.gs."+corpusID+".txt");
+            int pairs = train_tas.length / 2;
+            if (gs_arr.size() != pairs) {
+                System.out
+                        .println("Corpus does not match gold-standard; aborting training");
+                return;
+            }
+            for (int i = 0; i < pairs; i++) {
+                TextAnnotation ta1 = this.train_tas[2 * i];
+                TextAnnotation ta2 = this.train_tas[2 * i + 1];
+                double gs = gs_arr.get(i);
+                trainInstance(ta1, ta2, gs);
+            }
+            model = new M5P();
+            // model = new LibSVM();
+            model.buildClassifier(data);
+            
+            String svmFileName = "svm_folds/train_"+corpusID.split("\\.")[0]+"_YYY_CCM_"+corpusID.split("\\.")[1]+".txt";
+            saveSVMFeaturesToFile(svmFileName);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            System.out.println("Training failed.");
+            e.printStackTrace();
+        }
 	}
 
 	private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
@@ -891,8 +891,7 @@ public class Model3YYY extends Model {
 		inst.setValue(count, gs);
 		// System.out.println(inst);
 
-		if (isTrain)
-			svmFeatureBuffer.append(sb.toString() + "\n");
+		svmFeatureBuffer.append(sb.toString() + "\n");
 		return inst;
 	}
 
@@ -922,16 +921,15 @@ public class Model3YYY extends Model {
 
 	@Override
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
-
+	    resetSVMFeatureBuffer();
 		super.computeAndSaveOutputToFile(fileName);
 
 		// save feature vectors to file for (Guihua's) SVM training
-		String svmFileName = "svm_folds/"
-				+ fileName.substring(fileName.indexOf("/") + 1);
+        String svmFileName = "svm_folds/test_"+fileName.split("/")[1];
 		saveSVMFeaturesToFile(svmFileName);
 	}
 
-	private void saveSVMFeaturesToFile(String fileName) {
+	public void saveSVMFeaturesToFile(String fileName) {
 		String fileContent = svmFeatureBuffer.toString();
 		if (fileContent.isEmpty()) {
 			System.err.println("SVM features buffer is empty!");
@@ -974,13 +972,10 @@ public class Model3YYY extends Model {
 		for (int i = 0; i < 24; i++) {
 			if (i < 12) {
 				score[i] = score1[i];
-				// System.out.print(String.valueOf(score[i]) + ' ');
 			} else {
 				score[i] = score2[i - 12];
-				// System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
-		// System.out.println();
 		return score;
 	}
 
@@ -1173,13 +1168,10 @@ public class Model3YYY extends Model {
 		for (int i = 0; i < 10; i++) {
 			if (i < 5) {
 				score[i] = score1[i];
-				// System.out.print(String.valueOf(score[i]) + ' ');
 			} else {
 				score[i] = score2[i - 5];
-				// System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
-		// System.out.println();
 		return score;
 	}
 
@@ -1306,13 +1298,10 @@ public class Model3YYY extends Model {
 		for (int i = 0; i < 4; i++) {
 			if (i < 2) {
 				score[i] = score1[i];
-				// System.out.print(String.valueOf(score[i]) + ' ');
 			} else {
 				score[i] = score2[i - 2];
-				// System.out.print(String.valueOf(score[i]) + ' ');
 			}
 		}
-		// System.out.println();
 		return score;
 	}
 
