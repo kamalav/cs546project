@@ -43,19 +43,37 @@ public class ModelTestFolds {
 				testCorpus);
 
 		// do the below lines only once, when no serialization file is saved
-		SerializationUtils.serializeAllCorpusFoldsTextAnnotations(allCorpus);
+		// SerializationUtils.serializeAllCorpusFoldsTextAnnotations(allCorpus);
 
 		for (Corpus corpus : allCorpus) {
+			String id = corpus.getId();
+
 			// deserialize objects from file
 			System.out.println("Deserializing text annotations for "
 					+ corpus.getId() + "...");
-			String fileName = "serialization_folds/" + corpus.getId() + ".sel";
+			String fileName = "serialization_folds/" + id + ".sel";
 			TextAnnotation[] tas = SerializationUtils
 					.deserializeTextAnnotations(fileName);
 
 			// deserialize LLM scores from file
-			fileName = "serialization_folds/" + corpus.getId() + ".llm";
-			SerializationUtils.serializeLLMScores(tas, fileName);
+			fileName = "serialization_folds/" + id + ".llm";
+			double[] llmScores = SerializationUtils
+					.deserializeLLMScores(fileName);
+
+			for (Model model : models) {
+				// set the read objects to the model
+				model.setTextAnnotations(tas);
+				// set the LLM scores to the model
+				model.setLLMScores(llmScores);
+				// compute result and save to file
+				String dataset = id.substring(0, id.indexOf("."));
+				String fold = id.substring(id.indexOf(".") + 1,
+						id.lastIndexOf("."));
+				fileName = "output_folds/" + dataset + "_" + model.getId()
+						+ "_CCM_" + fold + ".txt";
+				System.out.println(fileName);
+				// model.computeAndSaveOutputToFile(fileName);
+			}
 		}
 
 		// serialize word similarity map
