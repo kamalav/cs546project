@@ -101,6 +101,10 @@ public class Model2XXX extends Model {
 		try {
 			double[] res = model.distributionForInstance(example);
 			similarity = model.classifyInstance(example);
+			if(similarity < 0)
+			    similarity = 0;
+			if(similarity > 5)
+			    similarity = 5;
 
 		} catch (Exception e) {
 			System.err.println("Exception while trying to classify");
