@@ -31,13 +31,13 @@ public class HandleResult {
 	public static void outputResult(String datasetname)
 	{
 		try {
-		String SVMoutput="svm/STS.svm."+datasetname;
+		String SVMoutput="svm/"+datasetname+"_prediction";
 		
 		FileInputStream fstream1 = new FileInputStream(SVMoutput);
 		DataInputStream in1 = new DataInputStream(fstream1);
 		BufferedReader br_SVMoutput = new BufferedReader(new InputStreamReader(in1));
 		
-		String modeloutput="output/"+datasetname+"_teamCCM_model2.txt";
+		String modeloutput="output_catched_guihua/"+datasetname+"_teamCCM_modelXXX.txt";
 		File file = new File(modeloutput);
 		FileOutputStream fop = new FileOutputStream(file);
 		
@@ -60,10 +60,106 @@ public class HandleResult {
 		
 	}
 	
+	public static void outputResult1(String datasetname)
+	{
+		try {
+		String SVMoutput="svm/"+datasetname+"_prediction";
+		
+		FileInputStream fstream1 = new FileInputStream(SVMoutput);
+		DataInputStream in1 = new DataInputStream(fstream1);
+		BufferedReader br_SVMoutput = new BufferedReader(new InputStreamReader(in1));
+		
+		String modeloutput="output_cached_guihua/"+datasetname+"_teamCCM_modelXXX.txt";
+		File file = new File(modeloutput);
+		FileOutputStream fop = new FileOutputStream(file);
+		
+		String line1;
+		while ((line1 = br_SVMoutput.readLine()) != null) {
+			String[] ss = line1.split(" ");
+			double resultscore=Double.parseDouble(ss[0]);
+			if(resultscore>5) resultscore=5;
+			if(resultscore<0) resultscore=0;
+			String re=String.valueOf(resultscore)+"\t"+"100"+"\n";
+			fop.write(re.getBytes());
+			
+		}
+		fop.flush();
+		fop.close();
+		}
+		
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	//analyze the model 2 and model 3
+		public static void printBadpair1(String datasetname) {
+			try {
+				String SVMoutput="svm/"+datasetname+"_prediction";
+				String inputfile="input/STS.input."+datasetname+".txt";
+				String gsfile="input/STS.gs."+datasetname+".txt";
+				String feature="svm/"+datasetname+".txt";
+				
+				FileInputStream fstream1 = new FileInputStream(SVMoutput);
+				DataInputStream in1 = new DataInputStream(fstream1);
+				BufferedReader br_SVMoutput = new BufferedReader(new InputStreamReader(in1));
+				
+				FileInputStream fstream2 = new FileInputStream(inputfile);
+				DataInputStream in2 = new DataInputStream(fstream2);
+				BufferedReader br_inputfile = new BufferedReader(new InputStreamReader(in2));
+				
+				FileInputStream fstream3 = new FileInputStream(gsfile);
+				DataInputStream in3 = new DataInputStream(fstream3);
+				BufferedReader br_gsfile = new BufferedReader(new InputStreamReader(in3));
+				
+				FileInputStream fstream4 = new FileInputStream(feature);
+				DataInputStream in4 = new DataInputStream(fstream4);
+				BufferedReader br_feature = new BufferedReader(new InputStreamReader(in4));
+				
+				String line1;
+				int count=0;
+				int num=0;
+				while ((line1 = br_SVMoutput.readLine()) != null) {
+					num++;
+					String[] ss = line1.split(" ");
+					double resultscore=Double.parseDouble(ss[0]);
+					if(resultscore>5) resultscore=5;
+					if(resultscore<0) resultscore=0;
+					
+					//System.out.println(ss[0]);
+					String gs=br_gsfile.readLine();
+					//System.out.println(num);
+					double gsdouble=Double.parseDouble(gs);
+					
+					
+					String sentencepair=br_inputfile.readLine();
+					
+					String featureline=br_feature.readLine();
+					
+					//the difference between the gs and our score is larger than 2, then output this pair
+					if(Math.abs(resultscore-gsdouble)>1) {
+						count++;
+						System.out.println("Sentence pair:"+sentencepair);
+						System.out.println("gs:"+gs+" "+"our score:"+ss[0]);
+						System.out.println("our feature's score:"+featureline);
+					}
+				}
+				in1.close();
+				in2.close();
+				in3.close();
+				in4.close();
+				System.out.println(count);
+				System.out.println(num);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	
 	//analyze the model 2 and model 3
 	public static void printBadpair(String datasetname) {
 		try {
-			String SVMoutput="svm/STS.svm."+datasetname;
+			String SVMoutput="svm/"+datasetname+"_prediction";
 			String inputfile="input/STS.input."+datasetname+".txt";
 			String gsfile="input/STS.gs."+datasetname+".txt";
 			String feature="svm/"+datasetname+".txt";
@@ -157,7 +253,7 @@ public class HandleResult {
 				String sentencepair=br_inputfile.readLine();
 				
 				//the difference between the gs and our score is larger than 2, then output this pair
-				if(Math.abs(resultscore-gsdouble)>2) {
+				if(Math.abs(resultscore-gsdouble)>1) {
 					count++;
 					System.out.println("Sentence pair:"+sentencepair);
 					System.out.println("gs:"+gs+" "+"our score:"+ss[0]);
@@ -208,8 +304,8 @@ public class HandleResult {
 	}*/
 	
 	public static void main(String[] args) throws IOException {
-		printBadpair("SMTeuroparl");
-		outputResult("SMTeuroparl");
+		printBadpair1("MSRvid");
+		outputResult1("MSRvid");
 		//analyzeLLM("MSRpar");
 	
 	}
