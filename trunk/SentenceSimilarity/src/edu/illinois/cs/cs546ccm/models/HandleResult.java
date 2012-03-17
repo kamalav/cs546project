@@ -60,16 +60,16 @@ public class HandleResult {
 		
 	}
 	
-	public static void outputResult1(String datasetname)
+	public static void outputResult1(String datasetname, int i, String model)
 	{
 		try {
-		String SVMoutput="svm/"+datasetname+"_prediction";
+		String SVMoutput="svm_folds/"+datasetname+"_"+model+"_CCM_"+String.valueOf(i)+"_prediction";
 		
 		FileInputStream fstream1 = new FileInputStream(SVMoutput);
 		DataInputStream in1 = new DataInputStream(fstream1);
 		BufferedReader br_SVMoutput = new BufferedReader(new InputStreamReader(in1));
 		
-		String modeloutput="output_cached_guihua/"+datasetname+"_teamCCM_modelXXX.txt";
+		String modeloutput="output_guihua_fold/"+datasetname+"_"+model+"_CCM_"+String.valueOf(i)+".txt";
 		File file = new File(modeloutput);
 		FileOutputStream fop = new FileOutputStream(file);
 		
@@ -304,8 +304,24 @@ public class HandleResult {
 	}*/
 	
 	public static void main(String[] args) throws IOException {
-		printBadpair1("MSRvid");
-		outputResult1("MSRvid");
+		//printBadpair1("MSRvid");
+		String[] datasetname=new String[3];
+		datasetname[0]="MSRvid";
+		datasetname[1]="MSRpar";
+		datasetname[2]="SMTeuroparl";
+		
+		String[] modelname=new String[2];
+		modelname[0]="XXX";
+		modelname[1]="YYY";
+		
+		for(String d1: datasetname){
+			for(String m1: modelname){
+				for(int i=0; i<1; i++){
+					outputResult1(d1, i, m1);
+				}
+			}
+		}
+		//outputResult1("MSRvid");
 		//analyzeLLM("MSRpar");
 	
 	}
