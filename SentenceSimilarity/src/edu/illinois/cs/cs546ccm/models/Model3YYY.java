@@ -68,7 +68,7 @@ public class Model3YYY extends Model {
 
 	private Instances defineFeatures() {
 		// Declare the attribute vector
-		attributes = new FastVector(57);
+		attributes = new FastVector(59);
 
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
@@ -116,6 +116,10 @@ public class Model3YYY extends Model {
 		for (int i=1; i<=4; i++)
 			attributes.addElement(new Attribute("k"+i));
 		
+		
+		// LLM_WNsim's features
+		attributes.addElement(new Attribute("w1"));
+		attributes.addElement(new Attribute("w2"));
 
 		
 		// Gold-standard score (class value)
@@ -165,6 +169,17 @@ public class Model3YYY extends Model {
 			return getTrainLLMScores(line);
 		return getTestLLMScores(line);
 	}
+	
+	private double[] score_WNsim(TextAnnotation ta1, TextAnnotation ta2,
+			boolean isTrain) {
+		// use cached raw LLM score as a feature
+		int line = Integer.parseInt(ta1.getId()) / 2;
+		if (isTrain)
+			return getTrainLLMScores_WNsim(line);
+		return getTestLLMScores_WNsim(line);
+	}
+	
+	
 
 	private double[] score4(TextAnnotation ta1, TextAnnotation ta2,
 			boolean isTrain) {
