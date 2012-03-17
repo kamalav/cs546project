@@ -802,7 +802,7 @@ public class Model3YYY extends Model {
 			model.buildClassifier(data);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			System.out.println("Training failed.");
+			System.err.println("Training failed.");
 			e.printStackTrace();
 		}
 	}
@@ -1073,7 +1073,7 @@ public class Model3YYY extends Model {
 									break;
 								}
 							} catch (Exception e) {
-								System.out.println(e1number + ' ' + e2number);
+								System.err.println(e1number + ' ' + e2number);
 							}
 						}
 					}
@@ -1088,7 +1088,7 @@ public class Model3YYY extends Model {
 			}
 			return score;
 		} catch (Exception e) {
-			System.out.println("can't get dependency view");
+			System.err.println("can't get dependency view");
 			return score;
 		}
 	}
@@ -1285,7 +1285,7 @@ public class Model3YYY extends Model {
 			}
 			return score;
 		} catch (Exception e) {
-			System.out.println("can't get dependency view");
+			System.err.println("can't get dependency view");
 			return score;
 		}
 	}
