@@ -738,30 +738,33 @@ public class Model2XXX extends Model {
 		return 100;
 	}
 
-	public void train(String gsFile) {
-        resetSVMFeatureBuffer();
-		try {
-			ArrayList<Double> gs_arr = getGSscores(gsFile);
-			int pairs = train_tas.length / 2;
-			if (gs_arr.size() != pairs) {
-				System.out
-						.println("Corpus does not match gold-standard; aborting training");
-				return;
-			}
-			for (int i = 0; i < pairs; i++) {
-				TextAnnotation ta1 = this.train_tas[2 * i];
-				TextAnnotation ta2 = this.train_tas[2 * i + 1];
-				double gs = gs_arr.get(i);
-				trainInstance(ta1, ta2, gs);
-			}
-			model = new M5P();
-			// model = new LibSVM();
-			model.buildClassifier(data);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Training failed.");
-			e.printStackTrace();
-		}
+	public void train(String corpusID) {
+	    resetSVMFeatureBuffer();
+        try {
+            ArrayList<Double> gs_arr = getGSscores("input_folds/STS.gs."+corpusID+".txt");
+            int pairs = train_tas.length / 2;
+            if (gs_arr.size() != pairs) {
+                System.out
+                        .println("Corpus does not match gold-standard; aborting training");
+                return;
+            }
+            for (int i = 0; i < pairs; i++) {
+                TextAnnotation ta1 = this.train_tas[2 * i];
+                TextAnnotation ta2 = this.train_tas[2 * i + 1];
+                double gs = gs_arr.get(i);
+                trainInstance(ta1, ta2, gs);
+            }
+            model = new M5P();
+            // model = new LibSVM();
+            model.buildClassifier(data);
+
+            String svmFileName = "svm_folds/train_"+corpusID.split("//.")[0]+"_XXX_CCM_"+corpusID.split("//.")[1]+".txt";
+            saveSVMFeaturesToFile(svmFileName);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            System.out.println("Training failed.");
+            e.printStackTrace();
+        }
 	}
 
 	private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
@@ -854,13 +857,12 @@ public class Model2XXX extends Model {
 
 	@Override
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
+	    resetSVMFeatureBuffer();
+        super.computeAndSaveOutputToFile(fileName);
 
-		super.computeAndSaveOutputToFile(fileName);
-
-		// save feature vectors to file for (Guihua's) SVM training
-		String corpusLabel = fileName.split("[/_]")[1];
-		String svmFileName = "svm/" + corpusLabel + ".txt";
-		saveSVMFeaturesToFile(svmFileName);
+        // save feature vectors to file for (Guihua's) SVM training
+        String svmFileName = "svm_folds/test_"+fileName.split("/")[1];
+        saveSVMFeaturesToFile(svmFileName);
 	}
 
 	private void saveSVMFeaturesToFile(String fileName) {

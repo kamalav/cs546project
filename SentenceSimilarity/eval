@@ -7,7 +7,6 @@ echo "MSRvid:"
 echo "SMTeuroparl:"
 ./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output_folds/SMTeuroparl_LLM.scores.txt
 echo " "
-
 echo "XXX:"
 echo "MSRpar:"
 ./correlation.pl ./input/STS.gs.MSRpar.txt ./output_folds/MSRpar_XXX.scores.txt
@@ -16,7 +15,6 @@ echo "MSRvid:"
 echo "SMTeuroparl:"
 ./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output_folds/SMTeuroparl_XXX.scores.txt
 echo " "
-
 echo "YYY:"
 echo "MSRpar:"
 ./correlation.pl ./input/STS.gs.MSRpar.txt ./output_folds/MSRpar_YYY.scores.txt
