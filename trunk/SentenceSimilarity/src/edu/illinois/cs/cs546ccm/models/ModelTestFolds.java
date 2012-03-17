@@ -22,9 +22,11 @@ public class ModelTestFolds {
 	public static void main(String[] args) throws Exception {
 
 		// add instances of models in this package to a model array
-		Model[] models = { new Model1LLM(), new Model2XXX(), new Model3YYY()};
+		Model[] models = {// new Model1LLM(),
+		                  //new Model2XXX(), 
+		                  new Model3YYY()};
 
-		String[] corpusNames = { "MSRvid", "MSRpar", "SMTeuroparl" };
+		String[] corpusNames = { "MSRvid"/*, "MSRpar","SMTeuroparl" */};
 		int folds = 5;
 
 		Corpus[] trainCorpus = new Corpus[folds * corpusNames.length];
@@ -59,6 +61,7 @@ public class ModelTestFolds {
 			TextAnnotation[] train_tas = SerializationUtils
 					.deserializeTextAnnotations(fileName);
 			
+			
 			// deserialize test objects from file
             System.out.println("Deserializing text annotations for "
                     + test.getId() + "...");
@@ -70,11 +73,16 @@ public class ModelTestFolds {
 			fileName = "serialization_folds/" + train.getId() + ".llm";
 			double[] train_llmScores = SerializationUtils
 					.deserializeLLMScores(fileName);
+			fileName = "serialization_folds/" + train.getId() + ".llm2";
+			double[] train_llmScores_WNsim=SerializationUtils.deserializeLLMScores(fileName);
 			
 			// deserialize test LLM scores from file
             fileName = "serialization_folds/" + test.getId() + ".llm";
             double[] test_llmScores = SerializationUtils
                     .deserializeLLMScores(fileName);
+            fileName = "serialization_folds/" + test.getId() + ".llm2";
+			double[] test_llmScores_WNsim=SerializationUtils.deserializeLLMScores(fileName);
+            
 
 			for (Model model : models) {
 				// set the read objects to the model
@@ -82,7 +90,11 @@ public class ModelTestFolds {
                 model.setTestAnnotations(test_tas);
 				// set the LLM scores to the model
 				model.setTrainLLMScores(train_llmScores);
+				model.setTrainLLMScores_WNsim(train_llmScores_WNsim);
+
                 model.setTestLLMScores(test_llmScores);
+                model.setTestLLMScores_WNsim(test_llmScores_WNsim);
+
 				// compute result and save to file
                 String id = train.getId();
 				String dataset = id.substring(0, id.indexOf("."));
