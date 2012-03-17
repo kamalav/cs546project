@@ -142,7 +142,7 @@ public class Model3YYY extends Model {
 		double similarity;
 		try {
 			double[] res = model.distributionForInstance(example);
-			similarity = model.classifyInstance(example) / 10;
+			similarity = model.classifyInstance(example);
 
 		} catch (Exception e) {
 			System.err.println("Exception while trying to classify");
