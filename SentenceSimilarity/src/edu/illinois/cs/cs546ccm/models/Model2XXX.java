@@ -11,7 +11,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.LibSVM;
 import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -45,7 +44,6 @@ public class Model2XXX extends Model {
 		// Declare the attribute vector
 		attributes = new FastVector(15);
 
-		
 		// Ryan's attributes
 		attributes.addElement(new Attribute("r1"));
 		attributes.addElement(new Attribute("r2"));
@@ -84,9 +82,9 @@ public class Model2XXX extends Model {
 			}
 		}
 		fvClassVal.addElement("5.0");
-        //
+		//
 		// attributes.addElement(new Attribute("gs_approx", fvClassVal));
-		 attributes.addElement(new Attribute("gs"));
+		attributes.addElement(new Attribute("gs"));
 		//
 
 		Instances ret = new Instances("CCM-SemanticSimilarity", attributes,
@@ -750,7 +748,7 @@ public class Model2XXX extends Model {
 				trainInstance(ta1, ta2, gs);
 			}
 			model = new M5P();
-			//model = new LibSVM();
+			// model = new LibSVM();
 			model.buildClassifier(data);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -782,11 +780,11 @@ public class Model2XXX extends Model {
 		inst.setDataset(data);
 
 		StringBuffer sb = new StringBuffer("");
-		sb.append(HandleResult.score_to_label(gs));
+		sb.append(gs);
 
 		int count = 0;
 		int featureIndex = 1;
-		
+
 		for (int i = 0; i < score1.length; i++) {
 			inst.setValue(count, score1[i]);
 			count++;
@@ -807,14 +805,14 @@ public class Model2XXX extends Model {
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score4[i]);
 		}
-		
+
 		for (int i = 0; i < score5.length; i++) {
 			inst.setValue(count, score5[i]);
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score5[i]);
 		}
 
-		//inst.setValue(count, parseGS(gs));
+		// inst.setValue(count, parseGS(gs));
 		inst.setValue(count, gs);
 		// System.out.println(inst);
 
