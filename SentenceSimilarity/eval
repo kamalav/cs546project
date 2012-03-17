@@ -1,13 +1,27 @@
 #!/bin/bash
-echo "MSRpar LLM:"
-./correlation.pl ./input/STS.gs.MSRpar.txt ./output/MSRpar_teamCCM_modelLLM.txt
-echo "MSRpar XXX:"
-./correlation.pl ./input/STS.gs.MSRpar.txt ./output/MSRpar_teamCCM_modelXXX.txt
-echo "MSRvid LLM:"
-./correlation.pl ./input/STS.gs.MSRpar.txt ./output/MSRpar_teamCCM_modelLLM.txt
-echo "MSRvid XXX:"
-./correlation.pl ./input/STS.gs.MSRvid.txt ./output/MSRvid_teamCCM_modelXXX.txt
-echo "SMTeuroparl LLM:"
-./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output/SMTeuroparl_teamCCM_modelLLM.txt
-echo "SMTeuroparl XXX:"
-./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output/SMTeuroparl_teamCCM_modelXXX.txt
+echo "LLM:"
+echo "MSRpar:"
+./correlation.pl ./input/STS.gs.MSRpar.txt ./output_folds/MSRpar_LLM.scores.txt
+echo "MSRvid:"
+./correlation.pl ./input/STS.gs.MSRvid.txt ./output_folds/MSRvid_LLM.scores.txt
+echo "SMTeuroparl:"
+./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output_folds/SMTeuroparl_LLM.scores.txt
+echo " "
+
+echo "XXX:"
+echo "MSRpar:"
+./correlation.pl ./input/STS.gs.MSRpar.txt ./output_folds/MSRpar_XXX.scores.txt
+echo "MSRvid:"
+./correlation.pl ./input/STS.gs.MSRvid.txt ./output_folds/MSRvid_XXX.scores.txt
+echo "SMTeuroparl:"
+./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output_folds/SMTeuroparl_XXX.scores.txt
+echo " "
+
+echo "YYY:"
+echo "MSRpar:"
+./correlation.pl ./input/STS.gs.MSRpar.txt ./output_folds/MSRpar_YYY.scores.txt
+echo "MSRvid:"
+./correlation.pl ./input/STS.gs.MSRvid.txt ./output_folds/MSRvid_YYY.scores.txt
+echo "SMTeuroparl:"
+./correlation.pl ./input/STS.gs.SMTeuroparl.txt ./output_folds/SMTeuroparl_YYY.scores.txt
+echo " "
