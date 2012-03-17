@@ -12,30 +12,45 @@ public abstract class Model {
 	 * an array of TextAnnotaion objects for all the sentences in a corpus,
 	 * using the 2*n, 2*n+1 scheme for indexing as well
 	 */
-	protected TextAnnotation[] tas;
+	protected TextAnnotation[] train_tas;
+    protected TextAnnotation[] test_tas;
 
-	public void setTextAnnotations(TextAnnotation[] tas) {
-		this.tas = tas;
+	public void setTrainAnnotations(TextAnnotation[] tas) {
+		this.train_tas = tas;
 	}
+	
+	public void setTestAnnotations(TextAnnotation[] tas) {
+        this.test_tas = tas;
+    }
 
 	/*
 	 * an array of LLM scores, which are read from the cached files
 	 * llmScores[2*i] is the score for i-th pair, llmScores[2*i+1] is the score
 	 * for i-th pair in reversed order
 	 */
-	protected double[] llmScores;
+	protected double[] train_llmScores;
+    protected double[] test_llmScores;
 
-	public void setLLMScores(double[] llmScores) {
-		this.llmScores = llmScores;
+	public void setTrainLLMScores(double[] llmScores) {
+		this.train_llmScores = llmScores;
 	}
+	
+	public void setTestLLMScores(double[] llmScores) {
+        this.test_llmScores = llmScores;
+    }
 
 	/*
 	 * return two LLM scores (normal and reversed) of sentences in the line
 	 */
-	public double[] getLLMScores(int line) {
-		return new double[] { this.llmScores[2 * line],
-				this.llmScores[2 * line + 1] };
+	public double[] getTrainLLMScores(int line) {
+		return new double[] { this.train_llmScores[2 * line],
+				this.train_llmScores[2 * line + 1] };
 	}
+	
+	public double[] getTestLLMScores(int line) {
+        return new double[] { this.test_llmScores[2 * line],
+                this.test_llmScores[2 * line + 1] };
+    }
 
 	/*
 	 * abstract function for computing similarity score (0.0-5.0) between two
@@ -50,20 +65,27 @@ public abstract class Model {
 	 * each actual model, definitely using corpus.get_annotation_pair(line)
 	 */
 	abstract public int confidence(TextAnnotation ta1, TextAnnotation ta2);
+	
+	/*
+	 * For methods that need training, prepare the model
+	 */
+	public void train(String gsFile) {
+	    
+	}
 
 	/*
 	 * generate a string representing the output file
 	 */
 	public String generateSimilarityAndConfidenceOutput() {
-		if (this.tas == null) {
+		if (this.test_tas == null) {
 			return null;
 		}
 
 		StringBuffer sb = new StringBuffer("");
-		int pairs = this.tas.length / 2;
+		int pairs = this.test_tas.length / 2;
 		for (int i = 0; i < pairs; i++) {
-			TextAnnotation ta1 = this.tas[2 * i];
-			TextAnnotation ta2 = this.tas[2 * i + 1];
+			TextAnnotation ta1 = this.test_tas[2 * i];
+			TextAnnotation ta2 = this.test_tas[2 * i + 1];
 			double similarity = similarity(ta1, ta2);
 			int confidence = confidence(ta1, ta2);
 			String outputLine = similarity + "\t" + confidence + "\n";

@@ -53,9 +53,11 @@ public class ModelTest {
 
 			for (Model model : models) {
 				// set the read objects to the model
-				model.setTextAnnotations(tas);
+				model.setTrainAnnotations(tas);
+                model.setTestAnnotations(tas);
 				// set the LLM scores to the model
-				model.setLLMScores(llmScores);
+				model.setTrainLLMScores(llmScores);
+                model.setTestLLMScores(llmScores);
 				// compute result and save to file
 				fileName = "output/" + corpus.getId() + "_teamCCM_model"
 						+ model.getId() + ".txt";
