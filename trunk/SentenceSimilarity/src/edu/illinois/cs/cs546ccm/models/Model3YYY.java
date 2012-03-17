@@ -1,9 +1,13 @@
 package edu.illinois.cs.cs546ccm.models;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,11 +34,33 @@ public class Model3YYY extends Model {
 	Classifier model;
 
 	StringBuffer svmFeatureBuffer;
+	Set<String> Stopwords=new HashSet<String>();
+
 
 	public Model3YYY() {
 		super("YYY");
 		data = defineFeatures();
 		resetSVMFeatureBuffer();
+		try {
+			FileInputStream fstream1 = new FileInputStream("config/llmStopwords.txt");
+	
+		
+		DataInputStream in1 = new DataInputStream(fstream1);
+		BufferedReader br_stopwords = new BufferedReader(new InputStreamReader(in1));
+		
+		String line;
+        while ((line=br_stopwords.readLine())!=null)
+        {
+        	Stopwords.add(line);           	
+        }
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	private void resetSVMFeatureBuffer() {
@@ -1340,6 +1366,74 @@ public class Model3YYY extends Model {
 		}
 
 		return score;
+	}
+	
+	double LLM_comparator(String[] s1, String[] s2){
+		double scale=1;
+		double score1=0;
+		double score2=0;
+		
+		int nstw1=0;
+		int nstw2=0;
+		
+		for (int i=0;i<s1.length;i++)
+		{
+			 double max=0;
+			 if (Stopwords.contains(s1[i]))
+			 { 
+				 nstw1++;  
+			 }
+			 else{
+				 
+			for(int j=0;j<s2.length;j++)
+			{   
+              if(!Stopwords.contains(s2[j]))
+              {
+				String w1=s1[i];
+				String w2=s2[j];
+				double temp=SimilarityUtils.wordSimilairty(w1, w2);
+                if (temp>max)
+                	max=temp;
+			
+              }
+             }
+			 
+			 }
+			  score1=score1+max;
+		}
+		for (int i=0;i<s2.length;i++)
+		{
+			double max=0;
+			if(Stopwords.contains(s2[i]))
+			{
+				nstw2++;
+			}
+			else 
+			{
+			for(int j=0;j<s1.length;j++)
+			{
+				if(!Stopwords.contains(s1[j]))
+				{
+				String w1=s2[i];
+				String w2=s1[j];
+				double temp=SimilarityUtils.wordSimilairty(w1, w2);
+                if (temp>max)
+                	max=temp;
+				}			
+			}
+			}
+			  score2=score2+max;
+		}
+		
+		double score=0;
+		
+	    int nlength1=s1.length-nstw1;
+	    int nlength2=s2.length-nstw2;
+		
+		if((nlength1!=0)&&(nlength2!=0))
+			score=(score1/nlength1+score2/nlength2)/2;		
+		
+		return scale * score;		
 	}
 
 }
