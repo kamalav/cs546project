@@ -586,7 +586,7 @@ public class Model3YYY extends Model {
 				|| !ta2.hasView(ViewNames.SHALLOW_PARSE)) {
 			return 1;
 		}
-		
+
 		// Guihua's method
 		// ta1 is Text, and ta2 is Hypothesis
 		View v1 = ta1.getView(ViewNames.SHALLOW_PARSE);
@@ -824,7 +824,7 @@ public class Model3YYY extends Model {
 			// model = new LibSVM();
 			model.buildClassifier(data);
 
-			String svmFileName = "svm_final/" + corpusID + ".txt";
+			String svmFileName = "svm_final/train_" + corpusID + ".txt";
 			saveSVMFeaturesToFile(svmFileName);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -966,7 +966,7 @@ public class Model3YYY extends Model {
 		super.computeAndSaveOutputToFile(fileName);
 
 		// save feature vectors to file for (Guihua's) SVM training
-		String svmFileName = "svm_folds/test_" + fileName.split("/")[1];
+		String svmFileName = "svm_final/test_" + fileName.split("/")[1];
 		saveSVMFeaturesToFile(svmFileName);
 	}
 
