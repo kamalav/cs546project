@@ -64,7 +64,7 @@ public class ModelTestFinal {
 			fileName = "serialization_final/" + test.getId() + ".llm";
 			double[] test_llmScores = SerializationUtils
 					.deserializeLLMScores(fileName);
-			fileName = "serialization_final/" + test.getId() + ".llm";
+			fileName = "serialization_final/" + test.getId() + ".llm2";
 			double[] test_llmScores_WNsim = SerializationUtils
 					.deserializeLLMScores(fileName);
 
