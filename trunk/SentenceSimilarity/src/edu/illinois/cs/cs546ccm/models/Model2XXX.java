@@ -204,6 +204,12 @@ public class Model2XXX extends Model {
 		double score = 0;
 		double scores[] = new double[1];
 		scores[0] = score;
+		
+		if( !ta1.hasView(ViewNames.POS) || !ta1.hasView(ViewNames.POS))
+		{
+		 scores[0]= 0.5;
+		return scores;
+		}
 
 		// The threshold for word comparator. For constituentMatch function.
 		double threshold = 0.9;
