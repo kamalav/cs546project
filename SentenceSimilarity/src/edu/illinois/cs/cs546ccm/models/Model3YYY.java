@@ -252,17 +252,16 @@ public class Model3YYY extends Model {
 			return new double[] { 1 };
 		}
 		// Cedar's method
-
-		// LLM as the comparator
-
-		// Model1LLM m = new Model1LLM();
-
-		// double result = m.similarity(chunckcontent1, chunckcontent2);
-
 		// Initialize the score of the pair of sentences to be 0.
+		
 		double score = 0;
 		double scores[] = new double[1];
 		scores[0] = score;
+		if( !ta1.hasView(ViewNames.POS) || !ta1.hasView(ViewNames.POS))
+			{
+			 scores[0]= 0.5;
+			return scores;
+			}
 
 		// The threshold for word comparator. For constituentMatch function.
 		double threshold = 0.9;
