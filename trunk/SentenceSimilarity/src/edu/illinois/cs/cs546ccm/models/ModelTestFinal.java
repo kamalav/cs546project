@@ -34,12 +34,6 @@ public class ModelTestFinal {
 				new Corpus("input_final/STS.input.surprise.SMTnews.txt",
 						"surprise.SMTnews") };
 
-		// do the below lines only once, when no serialization file is saved
-		for (Corpus corpus : testCorpus) {
-			String fileName = "serialization_final/" + corpus.getId() + ".sel";
-			SerializationUtils.serializeTextAnnotations(corpus, fileName);
-		}
-
 		for (int i = 0; i < trainCorpus.length; i++) {
 			Corpus train = trainCorpus[i];
 			Corpus test = testCorpus[i];
@@ -68,28 +62,28 @@ public class ModelTestFinal {
 
 			// deserialize test LLM scores from file
 			fileName = "serialization_final/" + test.getId() + ".llm";
-			SerializationUtils.serializeLLMScores(test_tas, fileName);
-			// double[] test_llmScores = SerializationUtils
-			// .deserializeLLMScores(fileName);
-			// fileName = "serialization_final/" + test.getId() + ".llm2";
-			// // SerializationUtils.serializeLLMScores(test_tas, fileName);
-			// double[] test_llmScores_WNsim = SerializationUtils
-			// .deserializeLLMScores(fileName);
-			//
-			// for (Model model : models) { // set the read objects to the model
-			// model.setTrainAnnotations(train_tas);
-			// model.setTestAnnotations(test_tas); // set the LLM scores to the
-			// model.setTrainLLMScores(train_llmScores);
-			// model.setTrainLLMScores_WNsim(train_llmScores_WNsim);
-			//
-			// model.setTestLLMScores(test_llmScores);
-			// model.setTestLLMScores_WNsim(test_llmScores_WNsim);
-			//
-			// // compute result and save to file fileName =
-			// fileName = "output_final/STS.output." + test.getId() + ".txt";
-			// model.train(train.getId());
-			// model.computeAndSaveOutputToFile(fileName);
-			// }
+			double[] test_llmScores = SerializationUtils
+					.deserializeLLMScores(fileName);
+			fileName = "serialization_final/" + test.getId() + ".llm";
+			double[] test_llmScores_WNsim = SerializationUtils
+					.deserializeLLMScores(fileName);
+
+			for (Model model : models) {
+				// set the read objects to the model
+				model.setTrainAnnotations(train_tas);
+				model.setTestAnnotations(test_tas);
+
+				// set the LLM scores
+				model.setTrainLLMScores(train_llmScores);
+				model.setTrainLLMScores_WNsim(train_llmScores_WNsim);
+				model.setTestLLMScores(test_llmScores);
+				model.setTestLLMScores_WNsim(test_llmScores_WNsim);
+
+				// compute result and save to file fileName =
+				fileName = "output_final/STS.output." + test.getId() + ".txt";
+				model.train(train.getId());
+				model.computeAndSaveOutputToFile(fileName);
+			}
 
 		}
 
