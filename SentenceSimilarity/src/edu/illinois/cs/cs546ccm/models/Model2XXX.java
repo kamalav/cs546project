@@ -534,6 +534,10 @@ public class Model2XXX extends Model {
 			throws IOException {
 		// Guihua's method
 		// ta1 is Text, and ta2 is Hypothesis
+		if (!ta1.hasView(ViewNames.SHALLOW_PARSE)
+				|| !ta2.hasView(ViewNames.SHALLOW_PARSE)) {
+			return 0;
+		}
 		View v1 = ta1.getView(ViewNames.SHALLOW_PARSE);
 		View v2 = ta2.getView(ViewNames.SHALLOW_PARSE);
 		// System.out.println(v1);
