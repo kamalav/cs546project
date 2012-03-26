@@ -113,15 +113,13 @@ public class Model3YYY extends Model {
 		for (int i = 1; i <= 4; i++)
 			attributes.addElement(new Attribute("s" + i));
 		// features about NP VP compare respectively for short sentences
-		for (int i=1; i<=4; i++)
-			attributes.addElement(new Attribute("k"+i));
-		
-		
+		for (int i = 1; i <= 4; i++)
+			attributes.addElement(new Attribute("k" + i));
+
 		// LLM_WNsim's features
 		attributes.addElement(new Attribute("w1"));
 		attributes.addElement(new Attribute("w2"));
 
-		
 		// Gold-standard score (class value)
 		// Code snippet for handling multi-class classification
 		FastVector fvClassVal = new FastVector(51);
@@ -149,10 +147,10 @@ public class Model3YYY extends Model {
 		double similarity;
 		try {
 			similarity = model.classifyInstance(example);
-            if(similarity < 0)
-                similarity = 0;
-            if(similarity > 5)
-                similarity = 5;
+			if (similarity < 0)
+				similarity = 0;
+			if (similarity > 5)
+				similarity = 5;
 
 		} catch (Exception e) {
 			System.err.println("Exception while trying to classify");
@@ -169,7 +167,7 @@ public class Model3YYY extends Model {
 			return getTrainLLMScores(line);
 		return getTestLLMScores(line);
 	}
-	
+
 	private double[] score_WNsim(TextAnnotation ta1, TextAnnotation ta2,
 			boolean isTrain) {
 		// use cached raw LLM score as a feature
@@ -178,8 +176,6 @@ public class Model3YYY extends Model {
 			return getTrainLLMScores_WNsim(line);
 		return getTestLLMScores_WNsim(line);
 	}
-	
-	
 
 	private double[] score4(TextAnnotation ta1, TextAnnotation ta2,
 			boolean isTrain) {
@@ -802,32 +798,33 @@ public class Model3YYY extends Model {
 	}
 
 	public void train(String corpusID) {
-	    resetSVMFeatureBuffer();
-        try {
-            ArrayList<Double> gs_arr = getGSscores("input_folds/STS.gs."+corpusID+".txt");
-            int pairs = train_tas.length / 2;
-            if (gs_arr.size() != pairs) {
-                System.out
-                        .println("Corpus does not match gold-standard; aborting training");
-                return;
-            }
-            for (int i = 0; i < pairs; i++) {
-                TextAnnotation ta1 = this.train_tas[2 * i];
-                TextAnnotation ta2 = this.train_tas[2 * i + 1];
-                double gs = gs_arr.get(i);
-                trainInstance(ta1, ta2, gs);
-            }
-            model = new M5P();
-            // model = new LibSVM();
-            model.buildClassifier(data);
-            
-            String svmFileName = "svm_folds/train_"+corpusID.split("\\.")[0]+"_YYY_CCM_"+corpusID.split("\\.")[1]+".txt";
-            saveSVMFeaturesToFile(svmFileName);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            System.out.println("Training failed.");
-            e.printStackTrace();
-        }
+		resetSVMFeatureBuffer();
+		try {
+			ArrayList<Double> gs_arr = getGSscores("input/STS.gs." + corpusID
+					+ ".txt");
+			int pairs = train_tas.length / 2;
+			if (gs_arr.size() != pairs) {
+				System.err
+						.println("Corpus does not match gold-standard; aborting training");
+				return;
+			}
+			for (int i = 0; i < pairs; i++) {
+				TextAnnotation ta1 = this.train_tas[2 * i];
+				TextAnnotation ta2 = this.train_tas[2 * i + 1];
+				double gs = gs_arr.get(i);
+				trainInstance(ta1, ta2, gs);
+			}
+			model = new M5P();
+			// model = new LibSVM();
+			model.buildClassifier(data);
+
+			String svmFileName = "svm_final/" + corpusID + ".txt";
+			saveSVMFeaturesToFile(svmFileName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Training failed.");
+			e.printStackTrace();
+		}
 	}
 
 	private void trainInstance(TextAnnotation ta1, TextAnnotation ta2, double gs) {
@@ -846,8 +843,8 @@ public class Model3YYY extends Model {
 		double[] score6 = score_number(ta1, ta2);
 		double[] score7 = score_dependency(ta1, ta2);
 		double[] score8 = score_predicateofSRL(ta1, ta2);
-		double[] score9=score_NP_VP(ta1, ta2);
-		double[] score10=score_WNsim(ta1,ta2,isTrain);
+		double[] score9 = score_NP_VP(ta1, ta2);
+		double[] score10 = score_WNsim(ta1, ta2, isTrain);
 
 		return combineAttributes(score1, score2, score3, score4, score5,
 				score6, score7, score8, score9, score10, gs, isTrain);
@@ -855,7 +852,8 @@ public class Model3YYY extends Model {
 
 	private Instance combineAttributes(double[] score1, double[] score2,
 			double[] score3, double[] score4, double[] score5, double[] score6,
-			double[] score7, double[] score8, double[] score9, double[] score10, double gs, boolean isTrain) {
+			double[] score7, double[] score8, double[] score9,
+			double[] score10, double gs, boolean isTrain) {
 		Instance inst = new Instance(data.numAttributes());
 		inst.setDataset(data);
 
@@ -911,13 +909,13 @@ public class Model3YYY extends Model {
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score8[i]);
 		}
-		
+
 		for (int i = 0; i < score9.length; i++) {
 			inst.setValue(count, score9[i]);
 			count++;
 			sb.append(" " + featureIndex++ + ":" + score9[i]);
 		}
-		
+
 		for (int i = 0; i < score10.length; i++) {
 			inst.setValue(count, score10[i]);
 			count++;
@@ -958,11 +956,11 @@ public class Model3YYY extends Model {
 
 	@Override
 	public void computeAndSaveOutputToFile(String fileName) throws IOException {
-	    resetSVMFeatureBuffer();
+		resetSVMFeatureBuffer();
 		super.computeAndSaveOutputToFile(fileName);
 
 		// save feature vectors to file for (Guihua's) SVM training
-        String svmFileName = "svm_folds/test_"+fileName.split("/")[1];
+		String svmFileName = "svm_folds/test_" + fileName.split("/")[1];
 		saveSVMFeaturesToFile(svmFileName);
 	}
 
@@ -1398,67 +1396,89 @@ public class Model3YYY extends Model {
 
 		return score;
 	}
-	
-	//guihua, compare NP and VP fpr short sentences.
-	private double[] score_NP_VP(TextAnnotation ta1, TextAnnotation ta2){
-			double[] score=new double[4];
-			for(int i=0;i<4;i++) score[i]=0;
-			
-			if (!ta1.hasView(ViewNames.PARSE_STANFORD) || !ta2.hasView(ViewNames.PARSE_STANFORD)) {
-				return score;
-			}
-			
-			View v1=ta1.getView(ViewNames.PARSE_STANFORD);
-			View v2=ta2.getView(ViewNames.PARSE_STANFORD);
-			List<Constituent> r1=v1.getConstituents();
-			List<Constituent> r2=v2.getConstituents();
-			
-			int count1=0, count2=0;
-			String np1="";
-			String vp1="";
-			String np2="";
-			String vp2="";
-			for(Constituent e1: r1){
-				if(e1.getLabel().equalsIgnoreCase("NP")) { count1++; if(count1==1) np1=e1.toString();}
-				if(e1.getLabel().endsWith("VP")) {count2++; if(count2==1) vp1=e1.toString();}	
-			}
-			count1=0; count2=0;
-			for(Constituent e2: r2){
-				if(e2.getLabel().equalsIgnoreCase("NP")) { count1++; if(count1==1) np2=e2.toString();}
-				if(e2.getLabel().endsWith("VP")) {count2++; if(count2==1) vp2=e2.toString();}	
-			}
-			
-			String[] npwords1=np1.split(" ");
-			String[] npwords2=np2.split(" ");
-			String[] vpwords1=vp1.split(" ");
-			String[] vpwords2=vp2.split(" ");
-			
-			if((npwords1.length+vpwords1.length)<15&&(npwords2.length+vpwords2.length)<15){
-				//compare NP, VP respectively
-				score[0]=(allStringCompare(npwords1, npwords2)+allStringCompare(npwords2, npwords1))/2;
-				score[1]=(allStringCompare(vpwords1, vpwords2)+allStringCompare(vpwords2, vpwords1))/2;
-				score[2]=LLM_comparator(npwords1, npwords2);
-				score[3]=LLM_comparator(vpwords1, vpwords2);
-			}
 
+	// guihua, compare NP and VP fpr short sentences.
+	private double[] score_NP_VP(TextAnnotation ta1, TextAnnotation ta2) {
+		double[] score = new double[4];
+		for (int i = 0; i < 4; i++)
+			score[i] = 0;
+
+		if (!ta1.hasView(ViewNames.PARSE_STANFORD)
+				|| !ta2.hasView(ViewNames.PARSE_STANFORD)) {
 			return score;
 		}
-		
-		private double allStringCompare(String[] s1, String[] s2){
-			double score = 0;
-			for (String w1 : s1) {
-				double point = 0;
-				for (String w2 : s2) {
-					double temp = SimilarityUtils.wordSimilairty(w1, w2);
-					if (temp > point)
-						point = temp;
-				}
-				score = score + point;
+
+		View v1 = ta1.getView(ViewNames.PARSE_STANFORD);
+		View v2 = ta2.getView(ViewNames.PARSE_STANFORD);
+		List<Constituent> r1 = v1.getConstituents();
+		List<Constituent> r2 = v2.getConstituents();
+
+		int count1 = 0, count2 = 0;
+		String np1 = "";
+		String vp1 = "";
+		String np2 = "";
+		String vp2 = "";
+		for (Constituent e1 : r1) {
+			if (e1.getLabel().equalsIgnoreCase("NP")) {
+				count1++;
+				if (count1 == 1)
+					np1 = e1.toString();
 			}
-			if (s1.length > 0)
-				return score / s1.length;
-			return score;
+			if (e1.getLabel().endsWith("VP")) {
+				count2++;
+				if (count2 == 1)
+					vp1 = e1.toString();
+			}
 		}
+		count1 = 0;
+		count2 = 0;
+		for (Constituent e2 : r2) {
+			if (e2.getLabel().equalsIgnoreCase("NP")) {
+				count1++;
+				if (count1 == 1)
+					np2 = e2.toString();
+			}
+			if (e2.getLabel().endsWith("VP")) {
+				count2++;
+				if (count2 == 1)
+					vp2 = e2.toString();
+			}
+		}
+
+		String[] npwords1 = np1.split(" ");
+		String[] npwords2 = np2.split(" ");
+		String[] vpwords1 = vp1.split(" ");
+		String[] vpwords2 = vp2.split(" ");
+
+		if ((npwords1.length + vpwords1.length) < 15
+				&& (npwords2.length + vpwords2.length) < 15) {
+			// compare NP, VP respectively
+			score[0] = (allStringCompare(npwords1, npwords2) + allStringCompare(
+					npwords2, npwords1)) / 2;
+			score[1] = (allStringCompare(vpwords1, vpwords2) + allStringCompare(
+					vpwords2, vpwords1)) / 2;
+			score[2] = LLM_comparator(npwords1, npwords2);
+			score[3] = LLM_comparator(vpwords1, vpwords2);
+		}
+
+		return score;
+	}
+
+	private double allStringCompare(String[] s1, String[] s2) {
+		double score = 0;
+		for (String w1 : s1) {
+			double point = 0;
+			for (String w2 : s2) {
+				double temp = SimilarityUtils.wordSimilairty(w1, w2);
+				if (temp > point)
+					point = temp;
+			}
+			score = score + point;
+		}
+		if (s1.length > 0)
+			return score / s1.length;
+		return score;
+	}
 
 	double LLM_comparator(String[] s1, String[] s2) {
 		double scale = 1;
