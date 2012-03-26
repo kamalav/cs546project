@@ -587,7 +587,7 @@ public class Model3YYY extends Model {
 		/* temporary change by zhijin */
 		if (!ta1.hasView(ViewNames.SHALLOW_PARSE)
 				|| !ta2.hasView(ViewNames.SHALLOW_PARSE)) {
-			return 1;
+			return 0;
 		}
 
 		// Guihua's method
