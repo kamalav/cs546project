@@ -247,6 +247,10 @@ public class Model3YYY extends Model {
 	}
 
 	private double[] score3(TextAnnotation ta1, TextAnnotation ta2) {
+		/* temporary change by zhijin */
+		if (!ta1.hasView(ViewNames.POS) || !ta2.hasView(ViewNames.POS)) {
+			return new double[] { 1 };
+		}
 		// Cedar's method
 
 		// LLM as the comparator
