@@ -581,6 +581,12 @@ public class Model3YYY extends Model {
 
 	private double score2_1(TextAnnotation ta1, TextAnnotation ta2)
 			throws IOException {
+		/* temporary change by zhijin */
+		if (!ta1.hasView(ViewNames.SHALLOW_PARSE)
+				|| !ta2.hasView(ViewNames.SHALLOW_PARSE)) {
+			return 1;
+		}
+		
 		// Guihua's method
 		// ta1 is Text, and ta2 is Hypothesis
 		View v1 = ta1.getView(ViewNames.SHALLOW_PARSE);

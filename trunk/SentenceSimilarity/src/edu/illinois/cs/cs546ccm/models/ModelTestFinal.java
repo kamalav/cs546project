@@ -83,15 +83,16 @@ public class ModelTestFinal {
 				fileName = "output_final/STS.output." + test.getId() + ".txt";
 				model.train(train.getId());
 				model.computeAndSaveOutputToFile(fileName);
+
+				// serialize word similarity map
+
+				SerializationUtils.serializeHashMap(
+						SimilarityUtils.getWordSimilarityMap(),
+						SimilarityUtils.SIMILARITY_MAP_FILE_NAME);
 			}
 
 		}
 
-		// serialize word similarity map
-
-		SerializationUtils.serializeHashMap(
-				SimilarityUtils.getWordSimilarityMap(),
-				SimilarityUtils.SIMILARITY_MAP_FILE_NAME);
 	}
 
 }

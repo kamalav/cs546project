@@ -17,8 +17,8 @@ public class SimilarityUtils {
 	static EntityComparison entityComparator;
 
 	static {
-		String metricHost = "handy.cs.uiuc.edu";
-		int metricPort = 29022;
+		String metricHost = "greedy.cs.uiuc.edu";
+		int metricPort = 5988;
 		wnSimClient = new XmlRpcMetricClient("WNSim", metricHost, metricPort);
 
 		if ((new File(SIMILARITY_MAP_FILE_NAME)).exists()) {
@@ -46,6 +46,7 @@ public class SimilarityUtils {
 		} else {
 			MetricResponse response = wnSimClient.compareStrings(word1, word2);
 			wordSimilarityMap.put(key, response.score);
+			System.out.println(word1 + " vs " + word2 + ": " + response.score);
 			return response.score;
 		}
 	}
