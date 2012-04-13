@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -54,6 +53,8 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	/** The index of the current color to use. */
 	int mColorIndex;
 
+	private TextView coordView;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -66,7 +67,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 
 		TextView tvTitle = new TextView(this);
 		tvTitle.setText("Cursive Writing Panel");
-		tvTitle.setTextSize(20);
+		tvTitle.setTextSize(25);
 		tvTitle.setHeight(100);
 		tvTitle.setPadding(30, 0, 0, 0);
 		tvTitle.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
@@ -80,7 +81,8 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 
 		TextView tvHint = new TextView(this);
 		tvHint.setText("Write a digit or English letter below.");
-		tvHint.setPadding(30, 0, 0, 0);
+		tvHint.setTextSize(15);
+		tvHint.setPadding(30, 0, 0, 10);
 		TextView tvState = new TextView(this);
 		tvState.setText("Wait for writing...");
 
@@ -91,13 +93,21 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 
 		// Create and attach the view that is responsible for painting.
 		mView = new PaintView(this);
+		mView.setPadding(30, 30, 30, 30);
 
 		LinearLayout result = new LinearLayout(this);
 		result.setOrientation(1);
+		coordView = new TextView(this);
+		coordView.setText("Current coordinate:");
+		coordView.setWidth(300);
+		coordView.setPadding(0, 100, 0, 20);
+		coordView.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
 		TextView tvObserveSeqLabel = new TextView(this);
 		tvObserveSeqLabel.setText("HMM observation sequence:");
 		tvObserveSeqLabel.setWidth(300);
-		tvObserveSeqLabel.setPadding(0, 100, 0, 20);
+		tvObserveSeqLabel.setPadding(0, 0, 0, 20);
 		tvObserveSeqLabel.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -112,6 +122,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		tvProbs.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
+		result.addView(coordView);
 		result.addView(tvObserveSeqLabel);
 		result.addView(tvObserveSeq);
 		result.addView(tvProbs);
@@ -278,7 +289,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 			mPaint.setAntiAlias(true);
 
 			mFadePaint = new Paint();
-			mFadePaint.setColor(BACKGROUND_COLOR);
+			// mFadePaint.setColor(BACKGROUND_COLOR);
 			mFadePaint.setAlpha(FADE_ALPHA);
 		}
 
@@ -431,6 +442,9 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 				}
 				mCurX = event.getX();
 				mCurY = event.getY();
+
+				coordView.setText("Current coordinate: (" + (int) mCurX + ", "
+						+ (int) mCurY + ")");
 			}
 			return true;
 		}
