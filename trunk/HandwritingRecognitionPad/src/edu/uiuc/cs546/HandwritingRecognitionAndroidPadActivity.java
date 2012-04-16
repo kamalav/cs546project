@@ -1,6 +1,10 @@
 package edu.uiuc.cs546;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,17 +16,21 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableLayout.LayoutParams;
 import android.widget.TableRow;
 import android.widget.TextView;
+import edu.uiuc.cs546.data.Datapoint;
+import edu.uiuc.cs546.data.Stroke;
 
 public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	/** Used as a pulse to gradually fade the contents of the window. */
@@ -45,7 +53,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	static final int BACKGROUND_COLOR = Color.BLACK;
 
 	/** The view responsible for drawing the window. */
-	PaintView mView;
+	PaintView paintView;
 
 	/** Is fading mode enabled? */
 	boolean mFading;
@@ -53,13 +61,19 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	/** The index of the current color to use. */
 	int mColorIndex;
 
-	private TextView coordView;
+	private TextView tvCoord;
+	private TextView tvStatus;
+	private TextView tvPoints;
+
+	private List<Stroke> strokes;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.main);
+
+		strokes = new ArrayList<Stroke>();
 
 		TableLayout table = (TableLayout) this.findViewById(R.id.TableLayout);
 
@@ -71,11 +85,11 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		tvTitle.setHeight(100);
 		tvTitle.setPadding(30, 0, 0, 0);
 		tvTitle.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-		TextView tvStatus = new TextView(this);
-		tvStatus.setText("Status:");
+		TextView tvCoordLabel = new TextView(this);
+		tvCoordLabel.setText("Status:");
 
 		row1.addView(tvTitle);
-		row1.addView(tvStatus);
+		row1.addView(tvCoordLabel);
 
 		TableRow row2 = new TableRow(this);
 
@@ -83,25 +97,25 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		tvHint.setText("Write a digit or English letter below.");
 		tvHint.setTextSize(15);
 		tvHint.setPadding(30, 0, 0, 10);
-		TextView tvState = new TextView(this);
-		tvState.setText("Wait for writing...");
+		tvStatus = new TextView(this);
+		tvStatus.setText("Wait for writing...");
 
 		row2.addView(tvHint);
-		row2.addView(tvState);
+		row2.addView(tvStatus);
 
 		TableRow row3 = new TableRow(this);
 
 		// Create and attach the view that is responsible for painting.
-		mView = new PaintView(this);
-		mView.setPadding(30, 30, 30, 30);
+		paintView = new PaintView(this);
+		paintView.setPadding(30, 30, 30, 30);
 
 		LinearLayout result = new LinearLayout(this);
 		result.setOrientation(1);
-		coordView = new TextView(this);
-		coordView.setText("Current coordinate:");
-		coordView.setWidth(300);
-		coordView.setPadding(0, 100, 0, 20);
-		coordView.setLayoutParams(new ViewGroup.LayoutParams(
+		tvCoord = new TextView(this);
+		tvCoord.setText("Current coordinate:");
+		tvCoord.setWidth(300);
+		tvCoord.setPadding(0, 100, 0, 20);
+		tvCoord.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
 		TextView tvObserveSeqLabel = new TextView(this);
@@ -122,12 +136,24 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		tvProbs.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
-		result.addView(coordView);
+		tvPoints = new TextView(this);
+		tvPoints.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+		result.addView(tvCoord);
 		result.addView(tvObserveSeqLabel);
 		result.addView(tvObserveSeq);
 		result.addView(tvProbs);
+		result.addView(tvPoints);
 
-		row3.addView(mView);
+		// getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+		// WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		// requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+		DrawView drawView = new DrawView(this);
+		drawView.requestFocus();
+
+		row3.addView(drawView);
 		row3.addView(result);
 
 		table.addView(row1, new TableLayout.LayoutParams(
@@ -137,7 +163,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		table.addView(row3, new TableLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
-		mView.requestFocus();
+		paintView.requestFocus();
 
 		// Restore the fading option if we are being thawed from a
 		// previously saved state. Note that we are not currently remembering
@@ -168,7 +194,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case CLEAR_ID:
-			mView.clear();
+			paintView.clear();
 			return true;
 		case FADE_ID:
 			mFading = !mFading;
@@ -245,10 +271,13 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 			// fade and then enqueue a new message to pulse at the desired
 			// next time.
 			case MSG_FADE: {
-				mView.fade();
+				paintView.fade();
 				scheduleFade();
+				tvStatus.setText("Start fading...");
 				break;
 			}
+			// can start recognition here!!!!!!!!!!!!
+			// case
 			default:
 				super.handleMessage(msg);
 			}
@@ -406,8 +435,10 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 					|| (buttonState & MotionEvent.BUTTON_PRIMARY) != 0) {
 				// Draw paint when touching or if the primary button is pressed.
 				mode = PaintMode.Draw;
+				tvStatus.setText("Drawing...");
 			} else {
 				// Otherwise, do not paint anything.
+				tvStatus.setText("Waiting for drawing...");
 				return false;
 			}
 
@@ -432,6 +463,8 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 										MotionEvent.AXIS_TILT, j, i));
 					}
 				}
+				Stroke stroke = new Stroke();
+				String str = "";
 				for (int j = 0; j < P; j++) {
 					paint(getPaintModeForTool(event.getToolType(j), mode),
 							event.getX(j), event.getY(j), event.getPressure(j),
@@ -439,12 +472,20 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 							event.getOrientation(j),
 							event.getAxisValue(MotionEvent.AXIS_DISTANCE, j),
 							event.getAxisValue(MotionEvent.AXIS_TILT, j));
+					str += "(" + event.getX(j) + ", " + event.getY(j) + ")\n";
 				}
 				mCurX = event.getX();
 				mCurY = event.getY();
 
-				coordView.setText("Current coordinate: (" + (int) mCurX + ", "
-						+ (int) mCurY + ")");
+				int x = (int) mCurX;
+				int y = (int) mCurY;
+				// can i just use the historical points as strokes?
+
+				strokes.add(stroke);
+				tvCoord.setText("Current coordinate: (" + x + ", " + y
+						+ "), N: " + N + " P:" + P + " strokes:"
+						+ strokes.size());
+				tvPoints.setText(str);
 			}
 			return true;
 		}
@@ -578,6 +619,79 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 				// Throw some paint at this location, relative to the center of
 				// the spray.
 				mCanvas.drawCircle(x + px - cx, y + py - cy, 1.0f, paint);
+			}
+		}
+	}
+
+	public class DrawView extends View implements OnTouchListener {
+		private static final String TAG = "DrawView";
+
+		List<Datapoint> points = new ArrayList<Datapoint>();
+		Paint paint = new Paint();
+
+		Timer timer = new Timer();
+
+		long stopDrawTime = -1;
+		Stroke stroke = new Stroke();
+
+		public DrawView(Context context) {
+			super(context);
+			setFocusable(true);
+			setFocusableInTouchMode(true);
+
+			this.setOnTouchListener(this);
+
+			paint.setColor(Color.WHITE);
+			paint.setAntiAlias(true);
+		}
+
+		@Override
+		public void onDraw(Canvas canvas) {
+
+			for (Datapoint point : points) {
+				canvas.drawCircle((float) point.x, (float) point.y, 10, paint);
+				// Log.d(TAG, "Painting: "+point);
+			}
+		}
+
+		public boolean onTouch(View view, MotionEvent event) {
+			// timer.cancel();
+			// timer.cancel();
+			// timer.schedule(new EraseTimerTask(), 3000);
+			Datapoint point = new Datapoint(event.getX(), event.getY());
+			stroke.addDatapoint(point);
+			switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+			case MotionEvent.ACTION_MOVE:
+			case MotionEvent.ACTION_HOVER_MOVE:
+
+				// if(event.getAction() != MotionEvent.ACTION_DOWN)
+				// return super.onTouchEvent(event);
+
+				points.add(point);
+				invalidate();
+				break;
+			case MotionEvent.ACTION_UP:
+				strokes.add(stroke);
+				stroke = new Stroke();
+				stopDrawTime = System.currentTimeMillis();
+				timer.schedule(new EraseTimerTask(), 2000);
+				Log.d(TAG,
+						"point: " + point + " total points: " + points.size());
+			}
+
+			return true;
+		}
+
+		class EraseTimerTask extends TimerTask {
+			public void run() {
+				if (stopDrawTime != -1
+						&& System.currentTimeMillis() - stopDrawTime >= 2000) {
+					Log.d(TAG, "stroke size: " + strokes.size());
+					// do recognition here
+					strokes = new ArrayList<Stroke>();
+					points = new ArrayList<Datapoint>();
+				}
 			}
 		}
 	}
