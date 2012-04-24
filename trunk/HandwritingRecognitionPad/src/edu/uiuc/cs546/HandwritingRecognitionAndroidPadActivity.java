@@ -1,6 +1,9 @@
 package edu.uiuc.cs546;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -29,8 +32,10 @@ import android.widget.TableLayout;
 import android.widget.TableLayout.LayoutParams;
 import android.widget.TableRow;
 import android.widget.TextView;
+import be.ac.ulg.montefiore.run.jahmm.io.HmmBinaryReader;
 import edu.uiuc.cs546.data.Datapoint;
 import edu.uiuc.cs546.data.Stroke;
+import edu.uiuc.cs546.hmm.LeftToRightHmm2;
 
 public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	/** Used as a pulse to gradually fade the contents of the window. */
@@ -64,8 +69,12 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 	private TextView tvCoord;
 	private TextView tvStatus;
 	private TextView tvPoints;
+	private TextView tvRecognition;
 
 	private List<Stroke> strokes;
+
+	// models
+	HashMap<String, LeftToRightHmm2> hmms;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +140,15 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		tvObserveSeq.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
+		TextView tvRecognitionLabel = new TextView(this);
+		tvRecognitionLabel.setText("Written strokes were recognized as:");
+		tvRecognitionLabel.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
+		tvRecognition = new TextView(this);
+		tvRecognition.setLayoutParams(new ViewGroup.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT));
 		TextView tvProbs = new TextView(this);
 		tvProbs.setText("p('1')=0.329\tp('a')=0.328\np('2')=0.889");
 		tvProbs.setLayoutParams(new ViewGroup.LayoutParams(
@@ -143,6 +161,8 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		result.addView(tvCoord);
 		result.addView(tvObserveSeqLabel);
 		result.addView(tvObserveSeq);
+		result.addView(tvRecognitionLabel);
+		result.addView(tvRecognition);
 		result.addView(tvProbs);
 		result.addView(tvPoints);
 
@@ -168,12 +188,34 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		// Restore the fading option if we are being thawed from a
 		// previously saved state. Note that we are not currently remembering
 		// the contents of the bitmap.
-		if (savedInstanceState != null) {
-			mFading = savedInstanceState.getBoolean("fading", true);
-			mColorIndex = savedInstanceState.getInt("color", 0);
-		} else {
-			mFading = true;
-			mColorIndex = 0;
+		// if (savedInstanceState != null) {
+		// mFading = savedInstanceState.getBoolean("fading", true);
+		// mColorIndex = savedInstanceState.getInt("color", 0);
+		// } else {
+		// mFading = true;
+		// mColorIndex = 0;
+		// }
+
+		// read hmms
+		hmms = new HashMap<String, LeftToRightHmm2>();
+		String[] characters = { "0", "1", "2", "3", "4", "5", "6", "7", "8",
+				"9" };
+		int[] modelHandles = { R.raw.hmm0, R.raw.hmm1, R.raw.hmm2, R.raw.hmm3,
+				R.raw.hmm4, R.raw.hmm5, R.raw.hmm6, R.raw.hmm7, R.raw.hmm8,
+				R.raw.hmm9 };
+		for (int i = 0; i < characters.length; i++) {
+			String character = characters[i];
+			int handle = modelHandles[i];
+			InputStream dis;
+			try {
+				dis = getResources().openRawResource(handle);
+				LeftToRightHmm2 hmm = new LeftToRightHmm2(
+						HmmBinaryReader.read(dis));
+				hmms.put(character, hmm);
+				Log.d("reading hmms", hmm.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -662,6 +704,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 			stroke.addDatapoint(point);
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
+				tvStatus.setText("Writing...");
 			case MotionEvent.ACTION_MOVE:
 			case MotionEvent.ACTION_HOVER_MOVE:
 
@@ -675,7 +718,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 				strokes.add(stroke);
 				stroke = new Stroke();
 				stopDrawTime = System.currentTimeMillis();
-				timer.schedule(new EraseTimerTask(), 2000);
+				timer.schedule(new RecognitionTimerTask(), 2000);
 				Log.d(TAG,
 						"point: " + point + " total points: " + points.size());
 			}
@@ -683,16 +726,38 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 			return true;
 		}
 
-		class EraseTimerTask extends TimerTask {
+		class RecognitionTimerTask extends TimerTask {
 			public void run() {
 				if (stopDrawTime != -1
 						&& System.currentTimeMillis() - stopDrawTime >= 2000) {
 					Log.d(TAG, "stroke size: " + strokes.size());
-					// do recognition here
+
+					runOnUiThread(new Runnable() {
+						public void run() {
+							recognize();
+						}
+					});
+
+					// clean up
 					strokes = new ArrayList<Stroke>();
 					points = new ArrayList<Datapoint>();
 				}
 			}
 		}
+	}
+
+	private void recognize() {
+		// update status
+		tvStatus.setText("Recognizing...");
+
+		// do recognition here
+		strokes = Stroke.connectStrokes(strokes);
+		String recognizedStr = "haha";// Recognizer.recognize(testStrokes);
+		Log.d("Recognizer", "stroke size: " + strokes.size());
+
+		// show result
+		tvRecognition.setText(recognizedStr);
+		tvStatus.setText("Recognized. See the result below.");
+
 	}
 }
