@@ -84,4 +84,31 @@ public class Stroke {
 
 		return strokes;
 	}
+
+	static public List<Stroke> connectStrokes(List<Stroke> strokes) {
+		List<Stroke> ss = new ArrayList<Stroke>();
+
+		// two data points used for sampling
+		Datapoint start = null;
+		Datapoint end = null;
+
+		for (int i = 0; i < strokes.size(); i++) {
+			if (i != 0) {
+				end = strokes.get(i).datapoints.get(0);
+				assert (start != null & end != null);
+				List<Datapoint> inviDps = DatapointSampler.virtualSampling(
+						start, end, 10);
+				boolean invisible = true;
+				strokes.add(new Stroke(inviDps, invisible));
+			}
+
+			start = strokes.get(i).datapoints.get(strokes.get(i).datapoints
+					.size() - 1);
+
+			ss.add(strokes.get(i));
+
+		}
+
+		return ss;
+	}
 }
