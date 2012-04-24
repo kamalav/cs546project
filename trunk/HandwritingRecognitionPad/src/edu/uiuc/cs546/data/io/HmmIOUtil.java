@@ -9,7 +9,7 @@ import java.util.HashMap;
 import be.ac.ulg.montefiore.run.jahmm.io.HmmBinaryReader;
 import edu.uiuc.cs546.hmm.HmmCommons;
 import edu.uiuc.cs546.hmm.LeftToRightHmm2;
-import edu.uiuc.cs547.hmm.feature.FeatureVector;
+import edu.uiuc.cs546.hmm.feature.FeatureVector;
 
 public class HmmIOUtil {
 
