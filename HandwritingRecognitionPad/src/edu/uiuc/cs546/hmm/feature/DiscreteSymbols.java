@@ -1,4 +1,4 @@
-package edu.uiuc.cs547.hmm.feature;
+package edu.uiuc.cs546.hmm.feature;
 
 import be.ac.ulg.montefiore.run.jahmm.ObservationDiscrete;
 

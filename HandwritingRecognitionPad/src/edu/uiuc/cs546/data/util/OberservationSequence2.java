@@ -5,8 +5,8 @@ import java.util.List;
 
 import be.ac.ulg.montefiore.run.jahmm.ObservationInteger;
 import edu.uiuc.cs546.data.Stroke;
-import edu.uiuc.cs547.hmm.feature.FeatureQuantizer2;
-import edu.uiuc.cs547.hmm.feature.FeatureVector;
+import edu.uiuc.cs546.hmm.feature.FeatureQuantizer2;
+import edu.uiuc.cs546.hmm.feature.FeatureVector;
 
 public class OberservationSequence2 {
 
