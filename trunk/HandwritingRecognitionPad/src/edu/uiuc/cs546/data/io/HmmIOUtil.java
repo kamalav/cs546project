@@ -1,11 +1,15 @@
 package edu.uiuc.cs546.data.io;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
+import android.content.Context;
 import be.ac.ulg.montefiore.run.jahmm.io.HmmBinaryReader;
 import edu.uiuc.cs546.hmm.HmmCommons;
 import edu.uiuc.cs546.hmm.LeftToRightHmm2;
@@ -33,8 +37,8 @@ public class HmmIOUtil {
 		return hmms;
 	}
 
-	static public FeatureVector[] readSavedFeatureVectors(String file) {
-		String[] lines = FileUtil.getLines(file);
+	static public FeatureVector[] readSavedFeatureVectors(String fileContent) {
+		String[] lines = fileContent.split("\n");
 		FeatureVector[] vectors = new FeatureVector[lines.length];
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
@@ -49,6 +53,25 @@ public class HmmIOUtil {
 					deltaWritingAngle, biggerX);
 		}
 		return vectors;
+	}
+
+	public static String readRawTextFile(Context ctx, int resId) {
+		InputStream inputStream = ctx.getResources().openRawResource(resId);
+
+		InputStreamReader inputreader = new InputStreamReader(inputStream);
+		BufferedReader buffreader = new BufferedReader(inputreader);
+		String line;
+		StringBuilder text = new StringBuilder();
+
+		try {
+			while ((line = buffreader.readLine()) != null) {
+				text.append(line);
+				text.append('\n');
+			}
+		} catch (IOException e) {
+			return null;
+		}
+		return text.toString();
 	}
 
 	/*

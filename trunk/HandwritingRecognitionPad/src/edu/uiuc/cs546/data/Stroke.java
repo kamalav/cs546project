@@ -111,4 +111,11 @@ public class Stroke {
 
 		return ss;
 	}
+
+	public static List<Stroke> makeYNegative(List<Stroke> strokes) {
+		for (Stroke s : strokes)
+			for (int i = 0; i < s.datapoints.size(); i++)
+				s.datapoints.get(i).y = -s.datapoints.get(i).y;
+		return strokes;
+	}
 }
