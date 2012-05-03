@@ -93,29 +93,31 @@ public class Stroke {
 		Datapoint end = null;
 
 		for (int i = 0; i < strokes.size(); i++) {
+			List<Datapoint> dps = new ArrayList<Datapoint>();
+			for (Datapoint point : strokes.get(i).getDatapoints()) {
+				Datapoint dp = new Datapoint(point.x, -point.y);
+				dps.add(dp);
+			}
+
 			if (i != 0) {
 				end = strokes.get(i).datapoints.get(0);
-				assert (start != null & end != null);
 				List<Datapoint> inviDps = DatapointSampler.virtualSampling(
 						start, end, 10);
 				boolean invisible = true;
-				strokes.add(new Stroke(inviDps, invisible));
+				ss.add(new Stroke(inviDps, invisible));
 			}
 
 			start = strokes.get(i).datapoints.get(strokes.get(i).datapoints
 					.size() - 1);
 
-			ss.add(strokes.get(i));
-
+			ss.add(new Stroke(dps, false));
 		}
 
 		return ss;
 	}
 
 	public static List<Stroke> makeYNegative(List<Stroke> strokes) {
-		for (Stroke s : strokes)
-			for (int i = 0; i < s.datapoints.size(); i++)
-				s.datapoints.get(i).y = -s.datapoints.get(i).y;
+
 		return strokes;
 	}
 }

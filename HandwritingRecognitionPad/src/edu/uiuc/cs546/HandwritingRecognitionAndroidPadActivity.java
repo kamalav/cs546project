@@ -34,6 +34,7 @@ import edu.uiuc.cs546.data.io.HmmIOUtil;
 import edu.uiuc.cs546.data.util.OberservationSequence;
 import edu.uiuc.cs546.hmm.LeftToRightHmm2;
 import edu.uiuc.cs546.hmm.feature.FeatureQuantizer;
+import edu.uiuc.cs546.preprocess.DatapointSampler;
 import edu.uiuc.cs546.preprocess.Smoother;
 import edu.uiuc.cs546.recognize.Recognizer;
 
@@ -109,7 +110,7 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 				ViewGroup.LayoutParams.WRAP_CONTENT));
 		tvObservation = new TextView(this);
 		tvObservation.setWidth(300);
-		tvObservation.setTextSize(10);
+		tvObservation.setHeight(100);
 		tvObservation.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -119,13 +120,13 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
 		tvRecognition = new TextView(this);
-		tvRecognition.setTextSize(30);
+		tvRecognition.setTextSize(40);
 		tvRecognition.setTextColor(Color.RED);
 		tvRecognition.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
 		tvProbs = new TextView(this);
-		tvProbs.setTextSize(10);
+		tvProbs.setTextSize(15);
 		tvProbs.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -276,12 +277,12 @@ public class HandwritingRecognitionAndroidPadActivity extends Activity {
 		// update status
 		tvStatus.setText("Recognizing...");
 
-		Log.d("Recognizer", "stroke 0: " + strokes.get(0));
-
 		// preprocess
 		strokes = Stroke.connectStrokes(strokes);
-		strokes = Stroke.makeYNegative(strokes);
-		// strokes = DatapointSampler.inStrokeSampling(strokes, 3, false);
+		strokes = DatapointSampler.inStrokeSampling(strokes, 5, false);
+
+		Log.d("Recognizer", "datapoints in stroke 0: "
+				+ strokes.get(0).getDatapoints().size());
 		strokes = Smoother.noiseSmoothing(strokes);
 
 		// recognize
